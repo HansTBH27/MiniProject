@@ -43,7 +43,7 @@ android {
 }
 
 dependencies {
-    implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation(libs.firebase.firestore.ktx)
     implementation(libs.google.firebase.auth.ktx)
     implementation(platform(libs.firebase.bom))
     implementation(libs.androidx.room.runtime)
@@ -65,5 +65,5 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-
 }
+
