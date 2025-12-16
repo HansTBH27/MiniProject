@@ -11,48 +11,53 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.miniproject.admin.AdminScreen
 import com.example.miniproject.ui.theme.MiniProjectTheme
-import com.google.firebase.firestore.FirebaseFirestore
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val db = FirebaseFirestore.getInstance()
-
-        // Test write
-        val testData = hashMapOf(
-            "message" to "Hello Firestore!",
-            "timestamp" to System.currentTimeMillis()
-        )
-
-        db.collection("test")
-            .add(testData)
-            .addOnSuccessListener {
-                Log.d("FIRESTORE", "Write successful!")
-            }
-            .addOnFailureListener { e ->
-                Log.w("FIRESTORE", "Error writing document", e)
-            }
-
+        enableEdgeToEdge()
         setContent {
-            // your compose app content
+            Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                // Pass the padding to the AppNavigation function
+                AppNavigation(
+                    modifier = Modifier.padding(innerPadding),
+                )
+            }
         }
     }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    MiniProjectTheme {
-        Greeting("Android")
+    @Composable
+    fun Greeting(name: String, modifier: Modifier = Modifier) {
+        Text(
+            text = "Hello $name!",
+            modifier = modifier
+        )
+    }
+
+    @Preview(showBackground = true)
+    @Composable
+    fun GreetingPreview() {
+        MiniProjectTheme {
+            Greeting("Android")
+        }
+    }
+
+    @Composable
+    fun AppNavigation(modifier: Modifier) {
+        val navController = rememberNavController()
+        NavHost(
+            navController = navController,
+            startDestination = "admin"
+        ) {
+            composable("admin") {
+                AdminScreen(navController = navController)
+            }
+        }
     }
 }
