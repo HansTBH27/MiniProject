@@ -6,7 +6,7 @@ data class User(
 
     @DocumentId
     val id: String = "", // The document ID, same as Firebase Auth UID
-    val displayId: String = "", // The ID to show to the user
+    val displayId: String = "", // Corrected to camelCase for consistency
     val email: String = "",
     val name: String = "",
     val role: String = ""

@@ -13,7 +13,7 @@ fun SearchBookingByReservationIdScreen(navController: NavController, viewModel: 
     val searchHistory by viewModel.searchHistory.collectAsState()
 
     SearchScreen(
-        title = "Bookings by ID",
+        title = "Reservation ID",
         searchPlaceholder = "Enter by reservation id...",
         searchText = searchText,
         onSearchTextChange = viewModel::onSearchTextChange,
@@ -21,6 +21,7 @@ fun SearchBookingByReservationIdScreen(navController: NavController, viewModel: 
         onClearHistoryItem = viewModel::onClearHistoryItem,
         onClearAllHistory = viewModel::clearAllHistory,
         onSearch = { viewModel.addSearchToHistory(searchText) },
-        onBackClick = { navController.popBackStack() }
+        onBackClick = { navController.popBackStack() },
+        content = { /* TODO: Display search results here */ }
     )
 }

@@ -21,6 +21,7 @@ fun SearchBookingByFacilityScreen(navController: NavController, viewModel: Searc
         onClearHistoryItem = viewModel::onClearHistoryItem,
         onClearAllHistory = viewModel::clearAllHistory,
         onSearch = { viewModel.addSearchToHistory(searchText) },
-        onBackClick = { navController.popBackStack() }
+        onBackClick = { navController.popBackStack() },
+        content = { /* TODO: Display search results here */ }
     )
 }

@@ -13,11 +13,14 @@ import com.example.miniproject.ui.theme.MiniProjectTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Firebase is now correctly initialized in MyApplication.kt
+        // The call here was redundant and has been removed.
+
         enableEdgeToEdge()
         setContent {
             MiniProjectTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    // Call the new, separate AppNavigation composable
                     AppNavigation(
                         modifier = Modifier.padding(innerPadding),
                     )
