@@ -26,6 +26,7 @@ import com.example.miniproject.admin.facilityAdmin.SubVenuesScreen
 import com.example.miniproject.admin.userAdmin.AdminStaffScreen
 import com.example.miniproject.admin.userAdmin.AdminStudentScreen
 import com.example.miniproject.admin.userAdmin.AdminUserScreen
+import com.example.miniproject.booking.BookingHistoryScreenTest
 import com.example.miniproject.payment.PaymentScreen
 
 @Composable
@@ -33,9 +34,16 @@ fun AppNavigation(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
     NavHost(
         navController = navController,
-        startDestination = "admin", // Temporarily set to show the new screen
+        startDestination = "booking_history", // Temporarily set to show the new screen
         modifier = modifier // Apply the modifier passed from the Scaffold
     ) {
+        // Tey Boon Han
+        composable("booking_history") {
+            BookingHistoryScreenTest(navController = navController, username = "John Doe")
+        }
+
+
+        // Low Mun Hou
         composable("admin") {
             AdminScreen(navController = navController)
         }

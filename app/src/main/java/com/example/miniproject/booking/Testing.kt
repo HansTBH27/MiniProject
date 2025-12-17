@@ -1,4 +1,4 @@
-package com.example.miniproject.admin
+package com.example.miniproject.booking
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,16 +20,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.miniproject.R
 import com.example.miniproject.components.Dashboard
 import com.example.miniproject.components.DashboardItemData
 
+data class BookingHistoryItem(
+    val facilityName: String,
+    val date: String,      // formatted
+    val time: String       // formatted
+)
+
 @Composable
-fun AdminScreen(
+fun BookingHistoryScreenTest(
     navController: NavController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    username: String
 ) {
     var showLogoutDialog by remember { mutableStateOf(false) }
 
@@ -62,7 +69,7 @@ fun AdminScreen(
     )
 
     Dashboard(
-        title = "Admin Panel",
+        title = "Welcome, $username !",
         items = items,
         onItemClick = { item ->
             navController.navigate(item.destinationRoute)
@@ -74,9 +81,9 @@ fun AdminScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Button(
-                    onClick = { showLogoutDialog = true }, 
+                    onClick = { showLogoutDialog = true },
                     modifier = Modifier
-                        .width(200.dp) 
+                        .width(200.dp)
                         .height(40.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
@@ -113,4 +120,10 @@ fun AdminScreen(
             }
         )
     }
+}
+
+@Preview
+@Composable
+fun BookingHistoryTestingPreview() {
+    BookingHistoryScreenTest(rememberNavController(), username = "John Doe");
 }

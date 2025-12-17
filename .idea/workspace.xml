@@ -10,8 +10,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ed961448-837d-4e1b-8533-3b1a0a952ab5" name="Changes" comment="Setup Firebase">
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/miniproject/booking/Testing.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/config.properties" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/config.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/miniproject/AppNavigation.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/miniproject/AppNavigation.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/miniproject/admin/adminScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/miniproject/admin/adminScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/miniproject/booking/Navigation/AppNavGraph.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/miniproject/booking/Navigation/AppNavGraph.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/miniproject/booking/UI/BookingHistoryScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/miniproject/booking/UI/BookingHistoryScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/local.properties" beforeDir="false" afterPath="$PROJECT_DIR$/local.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -21,7 +29,7 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[DeviceId(pluginId=LocalEmulator, isTemplate=false, identifier=path=C:\Users\User\.android\avd\Pixel_9_Pro.avd)]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[DeviceId(pluginId=LocalEmulator, isTemplate=false, identifier=path=C:\Users\teybo\.android\avd\Medium_Phone.avd)]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -39,6 +47,13 @@
       </state>
     </system>
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Kotlin Class" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
@@ -48,13 +63,13 @@
     &quot;assignee&quot;: &quot;HansTBH27&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/XavierCoding76/MiniProject.git&quot;,
-    &quot;accountId&quot;: &quot;035b4cfb-262d-4d23-a83c-7706632b6382&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/HansTBH27/MiniProject.git",
+    "accountId": "9c01a6cf-088f-4672-b414-828aa8495d89"
   }
-}</component>
-  <component name="GradleScriptDefinitionsStorage" workingDir="$PROJECT_DIR$" gradleHome="C:\Users\User\.gradle\wrapper\dists\gradle-9.0-milestone-1-bin\3vdepk4s12bybhohyuvjcm1bd\gradle-9.0-milestone-1" javaHome="C:\Program Files\Android\AndroidStudio\jbr" gradleVersion="9.0-milestone-1" />
+}]]></component>
+  <component name="GradleScriptDefinitionsStorage" workingDir="$PROJECT_DIR$" gradleHome="C:\Users\teybo\.gradle\wrapper\dists\gradle-9.0-milestone-1-bin\3vdepk4s12bybhohyuvjcm1bd\gradle-9.0-milestone-1" javaHome="C:\Program Files\Android\Android Studio1\jbr" gradleVersion="9.0-milestone-1" />
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="ProjectErrors" />
   </component>
@@ -79,7 +94,7 @@
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "com.google.services.firebase.aqiPopupShown": "true",
-    "git-widget-placeholder": "master",
+    "git-widget-placeholder": "Test",
     "kotlin-language-version-configured": "true"
   }
 }]]></component>
@@ -87,6 +102,9 @@
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\teybo\OneDrive\Desktop\MAD_Assigment 1.2\MiniProject\app" />
       <recent name="C:\Users\teybo\OneDrive\Desktop\MAD_Assigment 1.2\MiniProject\app\src" />
+    </key>
+    <key name="K2MoveDeclarationsDialog.RECENT_PACKAGE_KEY">
+      <recent name="com.example.miniproject.booking" />
     </key>
   </component>
   <component name="RunManager">
