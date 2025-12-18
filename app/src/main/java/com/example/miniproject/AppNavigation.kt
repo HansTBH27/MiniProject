@@ -26,7 +26,7 @@ import com.example.miniproject.admin.facilityAdmin.SubVenuesScreen
 import com.example.miniproject.admin.userAdmin.AdminStaffScreen
 import com.example.miniproject.admin.userAdmin.AdminStudentScreen
 import com.example.miniproject.admin.userAdmin.AdminUserScreen
-import com.example.miniproject.booking.BookingHistoryScreenTest
+import com.example.miniproject.booking.BookingHistoryScreen
 import com.example.miniproject.payment.PaymentScreen
 
 @Composable
@@ -39,7 +39,7 @@ fun AppNavigation(modifier: Modifier = Modifier) {
     ) {
         // Tey Boon Han
         composable("booking_history") {
-            BookingHistoryScreenTest(navController = navController, username = "John Doe")
+            BookingHistoryScreen(navController = navController, userId = "1", username = "John Doe")
         }
 
 

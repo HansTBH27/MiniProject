@@ -1,4 +1,4 @@
-package com.example.miniproject.booking
+package com.example.miniproject.booking.Navigation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,9 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.miniproject.booking.Navigation.BookingHistoryCard
-import com.example.miniproject.booking.Navigation.BookingHistoryViewModel
-import com.example.miniproject.booking.Navigation.BookingHistoryItem
+import com.example.miniproject.booking.BookingHistoryCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

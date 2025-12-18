@@ -48,7 +48,8 @@ dependencies {
 
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
-    implementation(libs.androidx.compose.foundation.layout) // For Coroutine support
+    implementation(libs.androidx.compose.foundation.layout)
+    implementation(libs.androidx.compose.foundation) // For Coroutine support
     ksp(libs.androidx.room.compiler) // KSP annotation processor
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
