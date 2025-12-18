@@ -10,6 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.miniproject.admin.AdminScreen
+import com.example.miniproject.admin.bookingAdmin.AddEditReservationScreen
 import com.example.miniproject.admin.bookingAdmin.AdminBookingScreen
 import com.example.miniproject.admin.bookingAdmin.SearchBookingByDateScreen
 import com.example.miniproject.admin.bookingAdmin.SearchBookingByFacilityScreen
@@ -173,5 +174,26 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                 userType = userType
             )
         }
+        // In your NavHost setup
+        composable(
+            route = "addEditReservation/{reservationId}",
+            arguments = listOf(navArgument("reservationId") {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            })
+        ) { backStackEntry ->
+            val reservationId = backStackEntry.arguments?.getString("reservationId")
+            AddEditReservationScreen(
+                navController = navController,
+                reservationId = reservationId
+            )
+        }
+        // In your NavHost composable
+        composable("addEditReservation") {
+            AddEditReservationScreen(navController = navController)
+        }
+
+
     }
 }

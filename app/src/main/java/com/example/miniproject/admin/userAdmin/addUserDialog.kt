@@ -77,6 +77,7 @@ fun AddUserDialog(
             password == confirmPassword &&
             password.length >= 6
 
+
     // Calculate if update button should be enabled
     val isUpdateButtonEnabled = !isLoading && !isSendingReset &&
             name.isNotBlank() &&
