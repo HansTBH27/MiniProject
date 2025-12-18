@@ -1,4 +1,3 @@
-
 package com.example.miniproject.admin.userAdmin
 
 import androidx.compose.foundation.layout.Box
@@ -32,6 +31,10 @@ fun AdminStaffScreen(
     val scope = rememberCoroutineScope()
 
     var showAddUserDialog by remember { mutableStateOf(false) }
+    var showModifyUserDialog by remember { mutableStateOf(false) }
+    var modifyUserName by remember { mutableStateOf("") }
+    var modifyUserEmail by remember { mutableStateOf("") }
+    var modifyUserDisplayId by remember { mutableStateOf("") }
 
     LaunchedEffect(error) {
         error?.let {
@@ -106,7 +109,21 @@ fun AdminStaffScreen(
                             SearchResultList(
                                 results = searchResults,
                                 onEditItem = { userId ->
-                                    navController.navigate("user_information/$userId/staff")
+                                    // Fetch user data and show modify dialog
+                                    viewModel.getUserForEdit(
+                                        userId = userId,
+                                        onSuccess = { userData ->
+                                            modifyUserName = userData.name
+                                            modifyUserEmail = userData.email
+                                            modifyUserDisplayId = userData.displayId
+                                            showModifyUserDialog = true
+                                        },
+                                        onError = { errorMessage ->
+                                            scope.launch {
+                                                snackbarHostState.showSnackbar(errorMessage)
+                                            }
+                                        }
+                                    )
                                 },
                                 onDeleteItem = { userId ->
                                     viewModel.deleteUser(userId)
@@ -117,6 +134,7 @@ fun AdminStaffScreen(
                 }
             )
 
+            // Add User Dialog
             AddUserDialog(
                 userType = "staff",
                 showDialog = showAddUserDialog,
@@ -143,9 +161,76 @@ fun AdminStaffScreen(
                 },
                 isLoading = false,
                 error = null,
-                generateDisplayId = { userType ->
+                generateDisplayId = { _ ->
                     viewModel.generateStaffDisplayId()
                 }
+            )
+
+            // Modify User Dialog
+            AddUserDialog(
+                userType = "staff",
+                showDialog = showModifyUserDialog,
+                onDismiss = {
+                    showModifyUserDialog = false
+                    modifyUserName = ""
+                    modifyUserEmail = ""
+                    modifyUserDisplayId = ""
+                },
+                onAddUser = { _, _, _, _ -> }, // Required but not used in modify mode
+                onUpdateUser = { name, email, displayId ->
+                    viewModel.updateUser(
+                        displayId = displayId,
+                        name = name,
+                        email = email,
+                        onSuccess = {
+                            scope.launch {
+                                snackbarHostState.showSnackbar("Staff updated successfully")
+                                showModifyUserDialog = false
+                                modifyUserName = ""
+                                modifyUserEmail = ""
+                                modifyUserDisplayId = ""
+                                // Refresh search results
+                                if (searchText.isNotBlank()) {
+                                    viewModel.onSearch()
+                                }
+                            }
+                        },
+                        onError = { errorMessage ->
+                            scope.launch {
+                                snackbarHostState.showSnackbar("Failed to update staff: $errorMessage")
+                            }
+                        }
+                    )
+                },
+                onSendPasswordReset = { email ->
+                    viewModel.sendPasswordReset(
+                        email = email,
+                        onSuccess = {
+                            scope.launch {
+                                snackbarHostState.showSnackbar("Password reset email sent to $email")
+                            }
+                        },
+                        onError = { errorMessage ->
+                            scope.launch {
+                                snackbarHostState.showSnackbar("Failed to send reset email: $errorMessage")
+                            }
+                        }
+                    )
+                },
+                isLoading = false,
+                isSendingReset = false,
+                error = null,
+                generateDisplayId = { _ ->
+                    viewModel.generateStaffDisplayId()
+                },
+                isModifyMode = true,
+                existingUser = if (modifyUserDisplayId.isNotEmpty()) {
+                    ExistingUserData(
+                        name = modifyUserName,
+                        email = modifyUserEmail,
+                        displayId = modifyUserDisplayId
+                    )
+                } else null
             )
         }
     }

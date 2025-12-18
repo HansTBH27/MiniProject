@@ -11,15 +11,25 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
+data class ExistingUserData(
+    val name: String,
+    val email: String,
+    val displayId: String
+)
 @Composable
 fun AddUserDialog(
     userType: String, // "student" or "staff"
     showDialog: Boolean,
     onDismiss: () -> Unit,
     onAddUser: (name: String, email: String, password: String, displayId: String) -> Unit,
+    onUpdateUser: (name: String, email: String, displayId: String) -> Unit = { _, _, _ -> }, // NEW for modify
+    onSendPasswordReset: (email: String) -> Unit = { _ -> }, // NEW for password reset
     isLoading: Boolean = false,
+    isSendingReset: Boolean = false, // NEW loading state for reset
     error: String? = null,
-    generateDisplayId: suspend (String) -> String // New parameter to generate display ID
+    generateDisplayId: suspend (String) -> String,
+    isModifyMode: Boolean = false, // NEW flag for modify mode
+    existingUser: ExistingUserData? = null // NEW existing user data for modify
 ) {
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -27,21 +37,62 @@ fun AddUserDialog(
     var confirmPassword by remember { mutableStateOf("") }
     var displayId by remember { mutableStateOf("") }
     var isGeneratingId by remember { mutableStateOf(false) }
+    var resetEmailSent by remember { mutableStateOf(false) } // NEW for reset confirmation
     val scope = rememberCoroutineScope()
 
-    // When dialog opens, generate display ID
-    LaunchedEffect(showDialog) {
+    // Data class for existing user
+
+
+    // When dialog opens, set up fields based on mode
+    LaunchedEffect(showDialog, isModifyMode, existingUser) {
         if (showDialog) {
-            isGeneratingId = true
-            displayId = generateDisplayId(userType)
-            isGeneratingId = false
+            if (isModifyMode && existingUser != null) {
+                // Populate with existing user data for modify mode
+                name = existingUser.name
+                email = existingUser.email
+                displayId = existingUser.displayId
+                password = ""
+                confirmPassword = ""
+                resetEmailSent = false
+            } else {
+                // For add mode, generate ID and clear fields
+                name = ""
+                email = ""
+                password = ""
+                confirmPassword = ""
+                resetEmailSent = false
+                isGeneratingId = true
+                displayId = generateDisplayId(userType)
+                isGeneratingId = false
+            }
         }
     }
 
+    // Calculate if add button should be enabled
+    val isAddButtonEnabled = !isLoading && !isGeneratingId &&
+            displayId.isNotBlank() &&
+            name.isNotBlank() &&
+            email.isNotBlank() &&
+            password.isNotBlank() &&
+            password == confirmPassword &&
+            password.length >= 6
+
+    // Calculate if update button should be enabled
+    val isUpdateButtonEnabled = !isLoading && !isSendingReset &&
+            name.isNotBlank() &&
+            email.isNotBlank()
+
     if (showDialog) {
         AlertDialog(
-            onDismissRequest = { if (!isLoading && !isGeneratingId) onDismiss() },
-            title = { Text("Add New ${userType.replaceFirstChar { it.uppercase() }}") },
+            onDismissRequest = {
+                if (!isLoading && !isGeneratingId && !isSendingReset) onDismiss()
+            },
+            title = {
+                Text(
+                    if (isModifyMode) "Modify ${userType.replaceFirstChar { it.uppercase() }}"
+                    else "Add New ${userType.replaceFirstChar { it.uppercase() }}"
+                )
+            },
             text = {
                 Column {
                     if (error != null) {
@@ -52,15 +103,20 @@ fun AddUserDialog(
                         )
                     }
 
-                    // Display ID field (read-only)
+                    // Display ID field
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         OutlinedTextField(
                             value = displayId,
-                            onValueChange = { /* Read-only */ },
-                            label = { Text("Display ID (Auto-generated)") },
+                            onValueChange = { if (!isModifyMode && !isGeneratingId) displayId = it },
+                            label = {
+                                Text(
+                                    if (isModifyMode) "Display ID"
+                                    else "Display ID (Auto-generated)"
+                                )
+                            },
                             leadingIcon = {
                                 Icon(
                                     Icons.Filled.Badge,
@@ -78,31 +134,34 @@ fun AddUserDialog(
                             },
                             singleLine = true,
                             modifier = Modifier.weight(1f),
-                            enabled = false,
-                            readOnly = true
+                            enabled = !isModifyMode, // Can't change ID in modify mode
+                            readOnly = isModifyMode || isGeneratingId
                         )
 
                         Spacer(modifier = Modifier.width(8.dp))
 
-                        // Refresh button
-                        IconButton(
-                            onClick = {
-                                if (!isGeneratingId && !isLoading) {
-                                    scope.launch {
-                                        isGeneratingId = true
-                                        displayId = generateDisplayId(userType)
-                                        isGeneratingId = false
+                        // Refresh button - only show for add mode
+                        if (!isModifyMode) {
+                            IconButton(
+                                onClick = {
+                                    if (!isGeneratingId && !isLoading && !isSendingReset) {
+                                        scope.launch {
+                                            isGeneratingId = true
+                                            displayId = generateDisplayId(userType)
+                                            isGeneratingId = false
+                                        }
                                     }
-                                }
-                            },
-                            enabled = !isGeneratingId && !isLoading
-                        ) {
-                            Icon(
-                                Icons.Filled.Refresh,
-                                contentDescription = "Generate New ID",
-                                tint = if (isGeneratingId || isLoading) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                                else MaterialTheme.colorScheme.primary
-                            )
+                                },
+                                enabled = !isGeneratingId && !isLoading && !isSendingReset
+                            ) {
+                                Icon(
+                                    Icons.Filled.Refresh,
+                                    contentDescription = "Generate New ID",
+                                    tint = if (isGeneratingId || isLoading || isSendingReset)
+                                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                    else MaterialTheme.colorScheme.primary
+                                )
+                            }
                         }
                     }
 
@@ -116,7 +175,8 @@ fun AddUserDialog(
                         leadingIcon = { Icon(Icons.Filled.Person, contentDescription = "Name") },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
-                        isError = name.isBlank()
+                        isError = name.isBlank(),
+                        enabled = !isSendingReset
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -129,70 +189,139 @@ fun AddUserDialog(
                         leadingIcon = { Icon(Icons.Filled.Email, contentDescription = "Email") },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
-                        isError = email.isBlank()
+                        isError = email.isBlank(),
+                        enabled = !isSendingReset
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    // PASSWORD FIELDS - Only show for add mode
+                    if (!isModifyMode) {
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                    // Password field
-                    OutlinedTextField(
-                        value = password,
-                        onValueChange = { password = it },
-                        label = { Text("Password") },
-                        leadingIcon = { Icon(Icons.Filled.Lock, contentDescription = "Password") },
-                        singleLine = true,
-                        visualTransformation = PasswordVisualTransformation(),
-                        modifier = Modifier.fillMaxWidth(),
-                        isError = password.isNotBlank() && password.length < 6
-                    )
+                        // Password field
+                        OutlinedTextField(
+                            value = password,
+                            onValueChange = { password = it },
+                            label = { Text("Password") },
+                            leadingIcon = { Icon(Icons.Filled.Lock, contentDescription = "Password") },
+                            singleLine = true,
+                            visualTransformation = PasswordVisualTransformation(),
+                            modifier = Modifier.fillMaxWidth(),
+                            isError = password.isNotBlank() && password.length < 6
+                        )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                    // Confirm Password field
-                    OutlinedTextField(
-                        value = confirmPassword,
-                        onValueChange = { confirmPassword = it },
-                        label = { Text("Confirm Password") },
-                        leadingIcon = { Icon(Icons.Filled.Lock, contentDescription = "Confirm Password") },
-                        singleLine = true,
-                        visualTransformation = PasswordVisualTransformation(),
-                        modifier = Modifier.fillMaxWidth(),
-                        isError = confirmPassword.isNotBlank() && password != confirmPassword
-                    )
+                        // Confirm Password field
+                        OutlinedTextField(
+                            value = confirmPassword,
+                            onValueChange = { confirmPassword = it },
+                            label = { Text("Confirm Password") },
+                            leadingIcon = { Icon(Icons.Filled.Lock, contentDescription = "Confirm Password") },
+                            singleLine = true,
+                            visualTransformation = PasswordVisualTransformation(),
+                            modifier = Modifier.fillMaxWidth(),
+                            isError = confirmPassword.isNotBlank() && password != confirmPassword
+                        )
+                    } else {
+                        // PASSWORD RESET SECTION - Only for modify mode
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Card(
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Icon(
+                                        Icons.Filled.VpnKey,
+                                        contentDescription = "Password reset",
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Column(
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Text(
+                                            "Password Reset",
+                                            style = MaterialTheme.typography.titleSmall
+                                        )
+                                        Text(
+                                            "Send password reset email to user",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+8
+                                    // Send reset button
+                                    if (isSendingReset) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(20.dp),
+                                            strokeWidth = 2.dp
+                                        )
+                                    } else {
+                                        FilledTonalButton(
+                                            onClick = {
+                                                onSendPasswordReset(email)
+                                            },
+                                            enabled = email.isNotBlank() && !resetEmailSent,
+                                            modifier = Modifier.height(36.dp)
+                                        ) {
+                                            Text(
+                                                if (resetEmailSent) "Sent!"
+                                                else "Send Reset",
+                                                style = MaterialTheme.typography.labelSmall
+                                            )
+                                        }
+                                    }
+                                }
+
+                                // Confirmation message
+                                if (resetEmailSent) {
+                                    Text(
+                                        text = "✓ Reset email sent to $email",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.padding(top = 8.dp)
+                                    )
+                                }
+                            }
+                        }
+
+                        Text(
+                            text = "User will receive an email to set a new password",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
                 }
             },
             confirmButton = {
                 Button(
                     onClick = {
-                        // Validate inputs
-                        if (displayId.isBlank()) {
-                            return@Button
-                        }
-                        if (name.isBlank()) {
-                            return@Button
-                        }
-                        if (email.isBlank()) {
-                            return@Button
-                        }
-                        if (password.isBlank()) {
-                            return@Button
-                        }
-                        if (password != confirmPassword) {
-                            return@Button
-                        }
-                        if (password.length < 6) {
-                            return@Button
-                        }
+                        if (isModifyMode) {
+                            // For modify mode - update user info only
+                            onUpdateUser(name, email, displayId)
+                        } else {
+                            // For add mode - validate and add new user
+                            if (displayId.isBlank()) return@Button
+                            if (name.isBlank()) return@Button
+                            if (email.isBlank()) return@Button
+                            if (password.isBlank()) return@Button
+                            if (password != confirmPassword) return@Button
+                            if (password.length < 6) return@Button
 
-                        onAddUser(name, email, password, displayId)
+                            onAddUser(name, email, password, displayId)
+                        }
                     },
-                    enabled = !isLoading && !isGeneratingId &&
-                            displayId.isNotBlank() &&
-                            name.isNotBlank() &&
-                            email.isNotBlank() &&
-                            password.isNotBlank() &&
-                            password == confirmPassword &&
-                            password.length >= 6
+                    enabled = if (isModifyMode) isUpdateButtonEnabled else isAddButtonEnabled
                 ) {
                     if (isLoading) {
                         CircularProgressIndicator(
@@ -201,14 +330,17 @@ fun AddUserDialog(
                             color = MaterialTheme.colorScheme.onPrimary
                         )
                     } else {
-                        Text("Add ${userType.replaceFirstChar { it.uppercase() }}")
+                        Text(
+                            if (isModifyMode) "Update User"
+                            else "Add ${userType.replaceFirstChar { it.uppercase() }}"
+                        )
                     }
                 }
             },
             dismissButton = {
                 TextButton(
                     onClick = { onDismiss() },
-                    enabled = !isLoading && !isGeneratingId
+                    enabled = !isLoading && !isGeneratingId && !isSendingReset
                 ) {
                     Text("Cancel")
                 }

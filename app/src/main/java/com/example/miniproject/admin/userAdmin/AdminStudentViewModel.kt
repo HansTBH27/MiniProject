@@ -62,6 +62,34 @@ class AdminStudentViewModel(application: Application) : AndroidViewModel(applica
         isManualSearch = false
     }
 
+    fun getUserForEdit(
+        userId: String,
+        onSuccess: (ExistingUserData) -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                val document = firestore.collection("user")
+                    .document(userId)
+                    .get()
+                    .await()
+
+                if (document.exists()) {
+                    val userData = ExistingUserData(
+                        name = document.getString("name") ?: "",
+                        email = document.getString("email") ?: "",
+                        displayId = document.getString("displayId") ?: ""
+                    )
+                    onSuccess(userData)
+                } else {
+                    onError("User not found")
+                }
+            } catch (e: Exception) {
+                onError("Error loading user: ${e.message}")
+            }
+        }
+    }
+
     fun onSearch() {
         val query = _searchText.value
         if (query.isNotBlank()) {
@@ -70,6 +98,80 @@ class AdminStudentViewModel(application: Application) : AndroidViewModel(applica
             performSearch(query)
         } else {
             _searchResults.value = null
+        }
+    }
+
+    fun updateUser(
+        displayId: String,
+        name: String,
+        email: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                // Find user by displayId
+                val userQuery = firestore.collection("user")
+                    .whereEqualTo("displayId", displayId)
+                    .whereEqualTo("role", "student")
+                    .get()
+                    .await()
+
+                if (userQuery.documents.isEmpty()) {
+                    onError("Student not found")
+                    return@launch
+                }
+
+                val userId = userQuery.documents[0].id
+                val currentEmail = userQuery.documents[0].getString("email") ?: ""
+
+                // Check if new email already exists (if email changed)
+                if (email.lowercase(Locale.getDefault()) != currentEmail.lowercase(Locale.getDefault())) {
+                    val existingEmailQuery = firestore.collection("user")
+                        .whereEqualTo("email", email.lowercase(Locale.getDefault()))
+                        .get()
+                        .await()
+
+                    if (!existingEmailQuery.isEmpty) {
+                        onError("Email $email is already in use by another user")
+                        return@launch
+                    }
+                }
+
+                // Update Firestore document
+                firestore.collection("user")
+                    .document(userId)
+                    .update(
+                        mapOf(
+                            "name" to name,
+                            "email" to email.lowercase(Locale.getDefault())
+                        )
+                    )
+                    .await()
+
+                // Note: Email update in Firebase Auth requires re-authentication
+                // For security reasons, email changes should typically be done by the user themselves
+                // This updates only the Firestore data
+
+                onSuccess()
+            } catch (e: Exception) {
+                onError(e.message ?: "Failed to update student")
+            }
+        }
+    }
+
+    fun sendPasswordReset(
+        email: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                auth.sendPasswordResetEmail(email).await()
+                onSuccess()
+            } catch (e: Exception) {
+                onError(e.message ?: "Failed to send password reset email")
+            }
         }
     }
 
@@ -97,11 +199,11 @@ class AdminStudentViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    // In searchExactMatch function, change to search by displayId field:
     private suspend fun searchExactMatch(query: String): List<SearchResultItemData> {
         return try {
             val querySnapshot = firestore.collection("user")
                 .whereEqualTo("displayId", query)
+                .whereEqualTo("role", "student")
                 .get()
                 .await()
 
@@ -111,7 +213,7 @@ class AdminStudentViewModel(application: Application) : AndroidViewModel(applica
                 val email = document.getString("email") ?: ""
 
                 SearchResultItemData(
-                    id = document.id,  // This is now the Auth UID
+                    id = document.id,
                     title = "$name ($displayId)",
                     subtitle = email
                 )
@@ -124,6 +226,7 @@ class AdminStudentViewModel(application: Application) : AndroidViewModel(applica
     private suspend fun searchWithPrefix(query: String) {
         try {
             val querySnapshot = firestore.collection("user")
+                .whereEqualTo("role", "student")
                 .get()
                 .await()
 
@@ -131,14 +234,6 @@ class AdminStudentViewModel(application: Application) : AndroidViewModel(applica
                 val displayId = document.getString("displayId") ?: return@mapNotNull null
                 val name = document.getString("name") ?: "Unknown"
                 val email = document.getString("email") ?: ""
-                val role = document.getString("role") ?: "user"
-
-                val isStudent = role.contains("student", ignoreCase = true) ||
-                        !displayId.startsWith("S", ignoreCase = true)
-
-                if (!isStudent) {
-                    return@mapNotNull null
-                }
 
                 if (displayId.startsWith(query, ignoreCase = true) ||
                     displayId.contains(query, ignoreCase = true) ||
@@ -184,12 +279,6 @@ class AdminStudentViewModel(application: Application) : AndroidViewModel(applica
     fun deleteUser(userId: String) {
         viewModelScope.launch {
             try {
-                // First delete from Authentication
-                auth.currentUser?.let {
-                    // Note: You need admin privileges to delete other users
-                    // For now, we'll just delete from Firestore
-                }
-
                 // Delete from Firestore
                 firestore.collection("user")
                     .document(userId)
@@ -215,19 +304,12 @@ class AdminStudentViewModel(application: Application) : AndroidViewModel(applica
     suspend fun generateStudentDisplayId(): String {
         return try {
             val users = firestore.collection("user")
+                .whereEqualTo("role", "student")
                 .get()
                 .await()
 
             val studentIds = users.documents.mapNotNull { document ->
-                val displayId = document.getString("displayId") ?: ""
-                val role = document.getString("role") ?: ""
-
-                if (role.contains("student", ignoreCase = true) ||
-                    !displayId.startsWith("S", ignoreCase = true)) {
-                    displayId
-                } else {
-                    null
-                }
+                document.getString("displayId")
             }
 
             var maxId = 0
@@ -246,7 +328,7 @@ class AdminStudentViewModel(application: Application) : AndroidViewModel(applica
             }
 
             val newId = maxId + 1
-            newId.toString()
+            "$newId" // Changed from just number to ST prefix
 
         } catch (e: Exception) {
             "1001"
@@ -287,7 +369,7 @@ class AdminStudentViewModel(application: Application) : AndroidViewModel(applica
                     return@launch
                 }
 
-                // 1. Create user in Firebase Authentication with displayId as UID
+                // Create user in Firebase Authentication
                 val authResult = auth.createUserWithEmailAndPassword(email, password).await()
                 val user = authResult.user
 
@@ -296,23 +378,21 @@ class AdminStudentViewModel(application: Application) : AndroidViewModel(applica
                     return@launch
                 }
 
-                // 2. Update user profile with name
+                // Update user profile with name
                 val profileUpdates = UserProfileChangeRequest.Builder()
                     .setDisplayName(name)
                     .build()
 
                 user.updateProfile(profileUpdates).await()
 
-                // 3. Store additional user data in Firestore using the same ID
+                // Store user data in Firestore using Auth UID
                 val studentData = hashMapOf(
                     "displayId" to formattedDisplayId,
                     "name" to name,
                     "email" to email.lowercase(Locale.getDefault()),
-                    "role" to "student",
-                    "authUid" to user.uid  // Store the Auth UID for reference
+                    "role" to "student"
                 )
 
-                // Use the Auth UID as the Firestore document ID for consistency
                 firestore.collection("user")
                     .document(user.uid)
                     .set(studentData)

@@ -30,10 +30,12 @@ fun AdminStudentScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    // State for Add User Dialog
     var showAddUserDialog by remember { mutableStateOf(false) }
+    var showModifyUserDialog by remember { mutableStateOf(false) }
+    var modifyUserName by remember { mutableStateOf("") }
+    var modifyUserEmail by remember { mutableStateOf("") }
+    var modifyUserDisplayId by remember { mutableStateOf("") }
 
-    // Show error in snackbar
     LaunchedEffect(error) {
         error?.let {
             snackbarHostState.showSnackbar(it)
@@ -121,7 +123,21 @@ fun AdminStudentScreen(
                                 SearchResultList(
                                     results = searchResults ?: emptyList(),
                                     onEditItem = { userId ->
-                                        navController.navigate("user_information/$userId/student")
+                                        // Fetch user data and show modify dialog
+                                        viewModel.getUserForEdit(
+                                            userId = userId,
+                                            onSuccess = { userData ->
+                                                modifyUserName = userData.name
+                                                modifyUserEmail = userData.email
+                                                modifyUserDisplayId = userData.displayId
+                                                showModifyUserDialog = true
+                                            },
+                                            onError = { errorMessage ->
+                                                scope.launch {
+                                                    snackbarHostState.showSnackbar(errorMessage)
+                                                }
+                                            }
+                                        )
                                     },
                                     onDeleteItem = { userId ->
                                         viewModel.deleteUser(userId)
@@ -160,9 +176,76 @@ fun AdminStudentScreen(
                 },
                 isLoading = false,
                 error = null,
-                generateDisplayId = { userType ->
+                generateDisplayId = { _ ->
                     viewModel.generateStudentDisplayId()
                 }
+            )
+
+            // Modify User Dialog
+            AddUserDialog(
+                userType = "student",
+                showDialog = showModifyUserDialog,
+                onDismiss = {
+                    showModifyUserDialog = false
+                    modifyUserName = ""
+                    modifyUserEmail = ""
+                    modifyUserDisplayId = ""
+                },
+                onAddUser = { _, _, _, _ -> }, // Required but not used in modify mode
+                onUpdateUser = { name, email, displayId ->
+                    viewModel.updateUser(
+                        displayId = displayId,
+                        name = name,
+                        email = email,
+                        onSuccess = {
+                            scope.launch {
+                                snackbarHostState.showSnackbar("Student updated successfully")
+                                showModifyUserDialog = false
+                                modifyUserName = ""
+                                modifyUserEmail = ""
+                                modifyUserDisplayId = ""
+                                // Refresh search results
+                                if (searchText.isNotBlank()) {
+                                    viewModel.onSearch()
+                                }
+                            }
+                        },
+                        onError = { errorMessage ->
+                            scope.launch {
+                                snackbarHostState.showSnackbar("Failed to update student: $errorMessage")
+                            }
+                        }
+                    )
+                },
+                onSendPasswordReset = { email ->
+                    viewModel.sendPasswordReset(
+                        email = email,
+                        onSuccess = {
+                            scope.launch {
+                                snackbarHostState.showSnackbar("Password reset email sent to $email")
+                            }
+                        },
+                        onError = { errorMessage ->
+                            scope.launch {
+                                snackbarHostState.showSnackbar("Failed to send reset email: $errorMessage")
+                            }
+                        }
+                    )
+                },
+                isLoading = false,
+                isSendingReset = false,
+                error = null,
+                generateDisplayId = { _ ->
+                    viewModel.generateStudentDisplayId()
+                },
+                isModifyMode = true,
+                existingUser = if (modifyUserDisplayId.isNotEmpty()) {
+                    ExistingUserData(
+                        name = modifyUserName,
+                        email = modifyUserEmail,
+                        displayId = modifyUserDisplayId
+                    )
+                } else null
             )
         }
     }
