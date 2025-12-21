@@ -19,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.miniproject.R
 import com.example.miniproject.components.Dashboard
@@ -36,25 +35,25 @@ fun AdminScreen(
     val items = listOf(
         DashboardItemData(
             title = "Facilities",
-            imageResId = R.drawable.ic_launcher_background,
+            imageResId = R.drawable.fast,
             backgroundColor = Color(0xFF6A5ACD),
             destinationRoute = "facilities_management"
         ),
         DashboardItemData(
             title = "Users",
-            imageResId = R.drawable.ic_launcher_background,
+            imageResId = R.drawable.fast,
             backgroundColor = Color(0xFF6A5ACD),
             destinationRoute = "user_management"
         ),
         DashboardItemData(
             title = "Bookings",
-            imageResId = R.drawable.ic_launcher_background,
+            imageResId = R.drawable.fast,
             backgroundColor = Color(0xFF6A5ACD),
             destinationRoute = "booking_management"
         ),
         DashboardItemData(
             title = "Report",
-            imageResId = R.drawable.ic_launcher_background,
+            imageResId = R.drawable.fast,
             backgroundColor = Color(0xFF6A5ACD),
             destinationRoute = "report_generation"
         )

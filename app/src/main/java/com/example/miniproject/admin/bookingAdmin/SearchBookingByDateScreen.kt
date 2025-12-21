@@ -1,6 +1,7 @@
 package com.example.miniproject.admin.bookingAdmin
 
 import android.app.DatePickerDialog
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,6 +24,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.miniproject.reservation.Reservation
+import com.example.miniproject.payment.Payment
+import com.example.miniproject.payment.PaymentDetail
+import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -349,14 +353,39 @@ private fun ReservationCard(
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
-    // ✅ Check if reservation time has passed
     val currentTime = System.currentTimeMillis()
     val reservationTime = reservation.bookedTime?.toDate()?.time ?: 0L
     val hasExpired = currentTime > reservationTime
 
+    var showPaymentDialog by remember { mutableStateOf(false) }
+    var paymentData by remember { mutableStateOf<Pair<Payment, List<PaymentDetail>>?>(null) }
+
+    LaunchedEffect(reservation.id) {
+        FirebaseFirestore.getInstance()
+            .collection("payment")
+            .whereEqualTo("reservationID", reservation.id)
+            .get()
+            .addOnSuccessListener { paymentSnapshot ->
+                if (!paymentSnapshot.isEmpty) {
+                    val payment = paymentSnapshot.documents.first().toObject(Payment::class.java)
+                    payment?.let { p ->
+                        FirebaseFirestore.getInstance()
+                            .collection("paymentDetails")
+                            .whereEqualTo("paymentId", p.id)
+                            .get()
+                            .addOnSuccessListener { detailsSnapshot ->
+                                val details = detailsSnapshot.documents.mapNotNull {
+                                    it.toObject(PaymentDetail::class.java)
+                                }
+                                paymentData = Pair(p, details)
+                            }
+                    }
+                }
+            }
+    }
+
     Card(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = Color(0xFFF5F5F5)
         ),
@@ -391,7 +420,20 @@ private fun ReservationCard(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // ✅ Show expired badge
+                    if (paymentData != null) {
+                        IconButton(
+                            onClick = { showPaymentDialog = true },
+                            modifier = Modifier.size(40.dp)
+                        ) {
+                            Icon(
+                                Icons.Filled.AttachMoney,
+                                contentDescription = "View Payment",
+                                tint = Color(0xFF4CAF50),
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    }
+
                     if (hasExpired) {
                         Surface(
                             color = Color(0xFFFF5252),
@@ -409,12 +451,12 @@ private fun ReservationCard(
 
                     Surface(
                         color = when (reservation.bookedHours) {
-                            0.5 -> Color(0xFF03A9F4)  // Light Blue
-                            1.0 -> Color(0xFF2196F3)  // Blue
-                            1.5 -> Color(0xFF00BCD4)  // Cyan
-                            2.0 -> Color(0xFF4CAF50)  // Green
-                            2.5 -> Color(0xFF8BC34A)  // Light Green
-                            3.0 -> Color(0xFFFF9800)  // Orange
+                            0.5 -> Color(0xFF03A9F4)
+                            1.0 -> Color(0xFF2196F3)
+                            1.5 -> Color(0xFF00BCD4)
+                            2.0 -> Color(0xFF4CAF50)
+                            2.5 -> Color(0xFF8BC34A)
+                            3.0 -> Color(0xFFFF9800)
                             else -> Color(0xFF6A5ACD)
                         },
                         shape = RoundedCornerShape(16.dp)
@@ -454,7 +496,6 @@ private fun ReservationCard(
                 value = formatTimestamp(reservation.bookedTime)
             )
 
-            // ✅ Only show buttons if reservation hasn't expired
             if (!hasExpired) {
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -497,7 +538,6 @@ private fun ReservationCard(
                     }
                 }
             } else {
-                // ✅ Show message for expired reservations
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Surface(
@@ -526,7 +566,103 @@ private fun ReservationCard(
             }
         }
     }
+
+    if (showPaymentDialog && paymentData != null) {
+        SimplifiedPaymentReceiptDialog(
+            payment = paymentData!!.first,
+            onDismiss = { showPaymentDialog = false }
+        )
+    }
 }
+
+@Composable
+private fun SimplifiedPaymentReceiptDialog(
+    payment: Payment,
+    onDismiss: () -> Unit
+) {
+    BackHandler(enabled = true) {
+        onDismiss()
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Filled.Receipt,
+                    contentDescription = "Receipt",
+                    tint = Color(0xFF483D8B),
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Payment Receipt", fontWeight = FontWeight.Bold)
+            }
+        },
+        text = {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                // Payment Header
+                Surface(
+                    color = Color(0xFFF5F5F5),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text("Payment ID: ${payment.id}", fontSize = 12.sp, color = Color.Gray)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text("Date: ${formatTimestamp(payment.date)}", fontSize = 12.sp, color = Color.Gray)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text("Reservation ID: ${payment.reservationID}", fontSize = 12.sp, color = Color.Gray)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Total Amount (Highlighted)
+                Surface(
+                    color = Color(0xFF4CAF50).copy(alpha = 0.1f),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                "Total Amount",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp,
+                                color = Color.Gray
+                            )
+                            Text(
+                                String.format("RM %.2f", payment.totalAmount),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 28.sp,
+                                color = Color(0xFF4CAF50)
+                            )
+                        }
+
+                        Icon(
+                            Icons.Filled.AttachMoney,
+                            contentDescription = "Payment",
+                            tint = Color(0xFF4CAF50),
+                            modifier = Modifier.size(48.dp)
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close", color = Color(0xFF483D8B))
+            }
+        }
+    )
+}
+
 
 @Composable
 private fun ReservationInfoRow(

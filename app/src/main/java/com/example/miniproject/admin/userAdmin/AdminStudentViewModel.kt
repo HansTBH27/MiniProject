@@ -104,7 +104,6 @@ class AdminStudentViewModel(application: Application) : AndroidViewModel(applica
     fun updateUser(
         displayId: String,
         name: String,
-        email: String,
         onSuccess: () -> Unit,
         onError: (String) -> Unit
     ) {
@@ -123,35 +122,12 @@ class AdminStudentViewModel(application: Application) : AndroidViewModel(applica
                 }
 
                 val userId = userQuery.documents[0].id
-                val currentEmail = userQuery.documents[0].getString("email") ?: ""
 
-                // Check if new email already exists (if email changed)
-                if (email.lowercase(Locale.getDefault()) != currentEmail.lowercase(Locale.getDefault())) {
-                    val existingEmailQuery = firestore.collection("user")
-                        .whereEqualTo("email", email.lowercase(Locale.getDefault()))
-                        .get()
-                        .await()
-
-                    if (!existingEmailQuery.isEmpty) {
-                        onError("Email $email is already in use by another user")
-                        return@launch
-                    }
-                }
-
-                // Update Firestore document
+                // Update Firestore document (name only)
                 firestore.collection("user")
                     .document(userId)
-                    .update(
-                        mapOf(
-                            "name" to name,
-                            "email" to email.lowercase(Locale.getDefault())
-                        )
-                    )
+                    .update("name", name)
                     .await()
-
-                // Note: Email update in Firebase Auth requires re-authentication
-                // For security reasons, email changes should typically be done by the user themselves
-                // This updates only the Firestore data
 
                 onSuccess()
             } catch (e: Exception) {
@@ -328,7 +304,7 @@ class AdminStudentViewModel(application: Application) : AndroidViewModel(applica
             }
 
             val newId = maxId + 1
-            "$newId" // Changed from just number to ST prefix
+            "$newId"
 
         } catch (e: Exception) {
             "1001"

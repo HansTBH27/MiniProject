@@ -16,20 +16,21 @@ data class ExistingUserData(
     val email: String,
     val displayId: String
 )
+
 @Composable
 fun AddUserDialog(
     userType: String, // "student" or "staff"
     showDialog: Boolean,
     onDismiss: () -> Unit,
     onAddUser: (name: String, email: String, password: String, displayId: String) -> Unit,
-    onUpdateUser: (name: String, email: String, displayId: String) -> Unit = { _, _, _ -> }, // NEW for modify
-    onSendPasswordReset: (email: String) -> Unit = { _ -> }, // NEW for password reset
+    onUpdateUser: (name: String, displayId: String) -> Unit = { _, _ -> }, // CHANGED: removed email parameter
+    onSendPasswordReset: (email: String) -> Unit = { _ -> },
     isLoading: Boolean = false,
-    isSendingReset: Boolean = false, // NEW loading state for reset
+    isSendingReset: Boolean = false,
     error: String? = null,
     generateDisplayId: suspend (String) -> String,
-    isModifyMode: Boolean = false, // NEW flag for modify mode
-    existingUser: ExistingUserData? = null // NEW existing user data for modify
+    isModifyMode: Boolean = false,
+    existingUser: ExistingUserData? = null
 ) {
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -37,11 +38,8 @@ fun AddUserDialog(
     var confirmPassword by remember { mutableStateOf("") }
     var displayId by remember { mutableStateOf("") }
     var isGeneratingId by remember { mutableStateOf(false) }
-    var resetEmailSent by remember { mutableStateOf(false) } // NEW for reset confirmation
+    var resetEmailSent by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-
-    // Data class for existing user
-
 
     // When dialog opens, set up fields based on mode
     LaunchedEffect(showDialog, isModifyMode, existingUser) {
@@ -77,11 +75,9 @@ fun AddUserDialog(
             password == confirmPassword &&
             password.length >= 6
 
-
     // Calculate if update button should be enabled
     val isUpdateButtonEnabled = !isLoading && !isSendingReset &&
-            name.isNotBlank() &&
-            email.isNotBlank()
+            name.isNotBlank()
 
     if (showDialog) {
         AlertDialog(
@@ -135,7 +131,7 @@ fun AddUserDialog(
                             },
                             singleLine = true,
                             modifier = Modifier.weight(1f),
-                            enabled = !isModifyMode, // Can't change ID in modify mode
+                            enabled = !isModifyMode,
                             readOnly = isModifyMode || isGeneratingId
                         )
 
@@ -182,17 +178,47 @@ fun AddUserDialog(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Email field
+                    // Email field - READ-ONLY in modify mode
                     OutlinedTextField(
                         value = email,
-                        onValueChange = { email = it },
-                        label = { Text("Email") },
+                        onValueChange = { if (!isModifyMode) email = it },
+                        label = { Text(if (isModifyMode) "Email (Read-only)" else "Email") },
                         leadingIcon = { Icon(Icons.Filled.Email, contentDescription = "Email") },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
-                        isError = email.isBlank(),
-                        enabled = !isSendingReset
+                        isError = !isModifyMode && email.isBlank(),
+                        enabled = !isModifyMode && !isSendingReset,
+                        readOnly = isModifyMode
                     )
+
+                    // Info note in modify mode
+                    if (isModifyMode) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Card(
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    Icons.Filled.Info,
+                                    contentDescription = "Info",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Email cannot be changed for security reasons",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
 
                     // PASSWORD FIELDS - Only show for add mode
                     if (!isModifyMode) {
@@ -259,7 +285,7 @@ fun AddUserDialog(
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     }
-8
+
                                     // Send reset button
                                     if (isSendingReset) {
                                         CircularProgressIndicator(
@@ -269,6 +295,7 @@ fun AddUserDialog(
                                     } else {
                                         FilledTonalButton(
                                             onClick = {
+                                                resetEmailSent = true
                                                 onSendPasswordReset(email)
                                             },
                                             enabled = email.isNotBlank() && !resetEmailSent,
@@ -308,8 +335,8 @@ fun AddUserDialog(
                 Button(
                     onClick = {
                         if (isModifyMode) {
-                            // For modify mode - update user info only
-                            onUpdateUser(name, email, displayId)
+                            // For modify mode - update user info only (name, no email)
+                            onUpdateUser(name, displayId)
                         } else {
                             // For add mode - validate and add new user
                             if (displayId.isBlank()) return@Button

@@ -31,7 +31,7 @@ import kotlinx.coroutines.launch
 fun UserInformationScreen(
     navController: NavController,
     userId: String,
-    userType: String, // "staff" or "student"
+    userType: String,
     viewModel: UserInformationViewModel = viewModel()
 ) {
     val userState by viewModel.userState.collectAsState()
@@ -39,7 +39,6 @@ fun UserInformationScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    // Load user data when screen opens
     LaunchedEffect(userId, userType) {
         viewModel.loadUser(userId, userType)
     }
@@ -70,7 +69,7 @@ fun UserInformationScreen(
                 .padding(paddingValues)
         ) {
             Image(
-                painter = painterResource(id = R.drawable.ic_launcher_background),
+                painter = painterResource(id = R.drawable.fast),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
@@ -143,7 +142,6 @@ fun UserInformationScreen(
                                 )
                             }
 
-                            // Role Badge
                             Surface(
                                 color = when (user.role.lowercase()) {
                                     "staff" -> Color(0xFF2196F3)
@@ -164,7 +162,6 @@ fun UserInformationScreen(
 
                         Spacer(modifier = Modifier.height(24.dp))
 
-                        // User Information Cards
                         UserInfoCard(
                             icon = Icons.Filled.Person,
                             label = "Name",
@@ -198,7 +195,6 @@ fun UserInformationScreen(
 
                         Spacer(modifier = Modifier.height(32.dp))
 
-                        // Action Buttons
                         Text(
                             text = "Actions",
                             fontSize = 18.sp,
@@ -206,7 +202,6 @@ fun UserInformationScreen(
                             modifier = Modifier.padding(bottom = 12.dp)
                         )
 
-                        // Edit Button
                         OutlinedButton(
                             onClick = {
                                 viewModel.showEditDialog(user)
@@ -223,7 +218,6 @@ fun UserInformationScreen(
 
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        // Delete Button
                         Button(
                             onClick = {
                                 viewModel.showDeleteConfirmation()
@@ -251,7 +245,7 @@ fun UserInformationScreen(
                                 Button(
                                     onClick = {
                                         viewModel.deleteUser(
-                                            userId = user.id, // Use the actual document ID
+                                            userId = user.id,
                                             userType = userType,
                                             onSuccess = {
                                                 scope.launch {
@@ -287,13 +281,25 @@ fun UserInformationScreen(
                             onDismissRequest = { viewModel.hideEditDialog() },
                             title = { Text("Edit User Information") },
                             text = {
-                                Column {
+                                Column(
+                                    modifier = Modifier.verticalScroll(rememberScrollState())
+                                ) {
                                     if (editState.error != null) {
-                                        Text(
-                                            text = editState.error!!,
-                                            color = Color.Red,
-                                            modifier = Modifier.padding(bottom = 8.dp)
-                                        )
+                                        Card(
+                                            colors = CardDefaults.cardColors(
+                                                containerColor = Color(0xFFFFEBEE)
+                                            ),
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(bottom = 8.dp)
+                                        ) {
+                                            Text(
+                                                text = editState.error!!,
+                                                color = Color(0xFFD32F2F),
+                                                modifier = Modifier.padding(12.dp),
+                                                fontSize = 14.sp
+                                            )
+                                        }
                                     }
 
                                     // Name field
@@ -319,6 +325,49 @@ fun UserInformationScreen(
                                         modifier = Modifier.fillMaxWidth(),
                                         isError = editState.email.isBlank()
                                     )
+
+                                    // Show warning if email changed
+                                    if (editState.emailChanged) {
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Card(
+                                            colors = CardDefaults.cardColors(
+                                                containerColor = Color(0xFFFFF3E0)
+                                            ),
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.padding(12.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Icon(
+                                                    Icons.Filled.Warning,
+                                                    contentDescription = "Warning",
+                                                    tint = Color(0xFFFF6F00),
+                                                    modifier = Modifier.size(20.dp)
+                                                )
+                                                Spacer(modifier = Modifier.width(8.dp))
+                                                Text(
+                                                    text = "Email change requires current password verification",
+                                                    fontSize = 12.sp,
+                                                    color = Color(0xFFE65100)
+                                                )
+                                            }
+                                        }
+
+                                        Spacer(modifier = Modifier.height(16.dp))
+
+                                        // Current Password field (required for email change)
+                                        OutlinedTextField(
+                                            value = editState.currentPassword,
+                                            onValueChange = { viewModel.updateCurrentPassword(it) },
+                                            label = { Text("Current Password *") },
+                                            leadingIcon = { Icon(Icons.Filled.VpnKey, contentDescription = "Current Password") },
+                                            singleLine = true,
+                                            visualTransformation = PasswordVisualTransformation(),
+                                            modifier = Modifier.fillMaxWidth(),
+                                            isError = editState.currentPassword.isBlank()
+                                        )
+                                    }
 
                                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -353,12 +402,21 @@ fun UserInformationScreen(
                                             isError = editState.password.isNotBlank() && editState.password.length < 6
                                         )
 
+                                        if (editState.password.isNotBlank() && editState.password.length < 6) {
+                                            Text(
+                                                text = "Password must be at least 6 characters",
+                                                color = Color.Red,
+                                                fontSize = 12.sp,
+                                                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                                            )
+                                        }
+
                                         Spacer(modifier = Modifier.height(8.dp))
 
                                         OutlinedTextField(
                                             value = editState.confirmPassword,
                                             onValueChange = { viewModel.updateConfirmPassword(it) },
-                                            label = { Text("Confirm Password") },
+                                            label = { Text("Confirm New Password") },
                                             leadingIcon = { Icon(Icons.Filled.Lock, contentDescription = "Confirm Password") },
                                             singleLine = true,
                                             visualTransformation = PasswordVisualTransformation(),
@@ -366,6 +424,15 @@ fun UserInformationScreen(
                                             isError = editState.confirmPassword.isNotBlank() &&
                                                     editState.password != editState.confirmPassword
                                         )
+
+                                        if (editState.confirmPassword.isNotBlank() && editState.password != editState.confirmPassword) {
+                                            Text(
+                                                text = "Passwords do not match",
+                                                color = Color.Red,
+                                                fontSize = 12.sp,
+                                                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                                            )
+                                        }
                                     }
                                 }
                             },
@@ -376,8 +443,13 @@ fun UserInformationScreen(
                                             userId = user.id,
                                             onSuccess = {
                                                 scope.launch {
-                                                    snackbarHostState.showSnackbar("User updated successfully")
-                                                    // Reload user data
+                                                    snackbarHostState.showSnackbar(
+                                                        if (editState.emailChanged) {
+                                                            "User updated! Verification email sent to new address."
+                                                        } else {
+                                                            "User updated successfully"
+                                                        }
+                                                    )
                                                     viewModel.loadUser(userId, userType)
                                                 }
                                             },
@@ -391,6 +463,7 @@ fun UserInformationScreen(
                                     enabled = !editState.isLoading &&
                                             editState.name.isNotBlank() &&
                                             editState.email.isNotBlank() &&
+                                            (!editState.emailChanged || editState.currentPassword.isNotBlank()) &&
                                             (!editState.showPasswordSection ||
                                                     (editState.password.isNotBlank() &&
                                                             editState.password == editState.confirmPassword &&

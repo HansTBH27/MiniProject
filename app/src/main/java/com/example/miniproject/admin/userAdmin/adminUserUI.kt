@@ -17,13 +17,13 @@ fun AdminUserScreen(
     val userItems = listOf(
         DashboardItemData(
             title = "Staff",
-            imageResId = R.drawable.ic_launcher_background, // Replace with your actual drawable
+            imageResId = R.drawable.fast, // Replace with your actual drawable
             backgroundColor = Color(0xFF6A5ACD), // SlateBlue to match screenshot
             destinationRoute = "admin_staff" // Updated to match AppNavigation
         ),
         DashboardItemData(
             title = "Students",
-            imageResId = R.drawable.ic_launcher_background, // Replace with your actual drawable
+            imageResId = R.drawable.fast, // Replace with your actual drawable
             backgroundColor = Color(0xFF6A5ACD),
             destinationRoute = "admin_students" // Updated to match AppNavigation
         )

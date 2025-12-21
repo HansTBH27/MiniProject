@@ -36,7 +36,7 @@ fun ArenaTarumtSportScreen(
         val encodedName = URLEncoder.encode(facility.name, StandardCharsets.UTF_8.toString())
         DashboardItemData(
             title = facility.name,
-            imageResId = R.drawable.ic_launcher_background,
+            imageResId = R.drawable.fast,
             backgroundColor = Color(0xFF6A5ACD),
             destinationRoute = "facility_detail/$encodedName"
         )

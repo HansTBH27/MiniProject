@@ -19,25 +19,25 @@ fun AdminBookingScreen(navController: NavController, modifier: Modifier = Modifi
     val items = listOf(
         DashboardItemData(
             title = "By User",
-            imageResId = R.drawable.ic_launcher_background,
+            imageResId = R.drawable.fast,
             backgroundColor = Color(0xFF6A5ACD),
             destinationRoute = "search_booking_by_user"
         ),
         DashboardItemData(
             title = "By Facility",
-            imageResId = R.drawable.ic_launcher_background,
+            imageResId = R.drawable.fast,
             backgroundColor = Color(0xFF6A5ACD),
             destinationRoute = "search_booking_by_facility"
         ),
         DashboardItemData(
             title = "By Reservation ID",
-            imageResId = R.drawable.ic_launcher_background,
+            imageResId = R.drawable.fast,
             backgroundColor = Color(0xFF6A5ACD),
             destinationRoute = "search_booking_by_reservation_id"
         ),
         DashboardItemData(
             title = "By Date",
-            imageResId = R.drawable.ic_launcher_background,
+            imageResId = R.drawable.fast,
             backgroundColor = Color(0xFF6A5ACD),
             destinationRoute = "search_booking_by_date"
         )

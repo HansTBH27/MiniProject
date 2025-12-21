@@ -36,7 +36,7 @@ fun LibraryScreen(
         val encodedName = URLEncoder.encode(it.name, StandardCharsets.UTF_8.toString())
         DashboardItemData(
             title = it.name,
-            imageResId = R.drawable.ic_launcher_background,
+            imageResId = R.drawable.fast,
             backgroundColor = Color(0xFF6A5ACD),
             destinationRoute = "facility_detail/$encodedName"
         )
