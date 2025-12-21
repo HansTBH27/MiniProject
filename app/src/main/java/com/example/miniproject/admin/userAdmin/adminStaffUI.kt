@@ -50,7 +50,7 @@ fun AdminStaffScreen(
                 onClick = {
                     showAddUserDialog = true
                 },
-                containerColor = Color(0xFF6A5ACD),
+                containerColor = Color(0xFF5553DC),
                 modifier = Modifier.padding(16.dp)
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Add Staff", tint = Color.White)
@@ -80,7 +80,7 @@ fun AdminStaffScreen(
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center
                             ) {
-                                CircularProgressIndicator(color = Color(0xFF6A5ACD))
+                                CircularProgressIndicator(color = Color(0xFF5553DC))
                             }
                         }
                         searchResults == null -> {

@@ -18,13 +18,13 @@ fun AdminUserScreen(
         DashboardItemData(
             title = "Staff",
             imageResId = R.drawable.ic_launcher_background, // Replace with your actual drawable
-            backgroundColor = Color(0xFF6A5ACD), // SlateBlue to match screenshot
+            backgroundColor = Color(0xFF5553DC),
             destinationRoute = "admin_staff" // Updated to match AppNavigation
         ),
         DashboardItemData(
             title = "Students",
             imageResId = R.drawable.ic_launcher_background, // Replace with your actual drawable
-            backgroundColor = Color(0xFF6A5ACD),
+            backgroundColor = Color(0xFF5553DC),
             destinationRoute = "admin_students" // Updated to match AppNavigation
         )
     )

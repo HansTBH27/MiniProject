@@ -69,7 +69,7 @@ fun SearchScreen(
             .fillMaxSize()
             .background(
                 brush = Brush.verticalGradient(
-                    colors = listOf(Color(0xFF483D8B), Color(0xFF6A5ACD))
+                    colors = listOf(Color(0xFF5553DC), Color(0xFF5553DC))
                 )
             )
     ) {
@@ -135,7 +135,7 @@ fun SearchScreen(
                         horizontalArrangement = Arrangement.End
                     ) {
                         TextButton(onClick = onClearAllHistory) {
-                            Text("Clear all", color = Color(0xFF6A5ACD), fontWeight = FontWeight.Bold)
+                            Text("Clear all", color = Color(0xFF5553DC), fontWeight = FontWeight.Bold)
                         }
                     }
                     searchHistory.take(5).forEach {

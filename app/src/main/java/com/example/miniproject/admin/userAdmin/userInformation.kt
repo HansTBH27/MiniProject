@@ -57,7 +57,7 @@ fun UserInformationScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF6A5ACD),
+                    containerColor = Color(0xFF5553DC),
                     titleContentColor = Color.White,
                     navigationIconContentColor = Color.White
                 )
@@ -80,7 +80,7 @@ fun UserInformationScreen(
                 userState.isLoading -> {
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.Center),
-                        color = Color(0xFF6A5ACD)
+                        color = Color(0xFF5553DC)
                     )
                 }
                 userState.error != null -> {
@@ -105,7 +105,7 @@ fun UserInformationScreen(
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(
                             onClick = { navController.popBackStack() },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A5ACD))
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5553DC))
                         ) {
                             Text("Go Back")
                         }
@@ -145,11 +145,7 @@ fun UserInformationScreen(
 
                             // Role Badge
                             Surface(
-                                color = when (user.role.lowercase()) {
-                                    "staff" -> Color(0xFF2196F3)
-                                    "admin" -> Color(0xFFFF9800)
-                                    else -> Color(0xFF4CAF50)
-                                },
+                                color = Color(0xFF5553DC),
                                 shape = RoundedCornerShape(16.dp)
                             ) {
                                 Text(
@@ -213,7 +209,7 @@ fun UserInformationScreen(
                             },
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = Color(0xFF6A5ACD)
+                                contentColor = Color(0xFF5553DC)
                             )
                         ) {
                             Icon(Icons.Filled.Edit, contentDescription = "Edit")
@@ -445,7 +441,7 @@ fun UserInfoCard(
             Icon(
                 imageVector = icon,
                 contentDescription = label,
-                tint = Color(0xFF6A5ACD),
+                tint = Color(0xFF5553DC),
                 modifier = Modifier.size(24.dp)
             )
             Spacer(modifier = Modifier.width(16.dp))

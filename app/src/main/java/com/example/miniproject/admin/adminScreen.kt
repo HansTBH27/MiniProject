@@ -37,26 +37,32 @@ fun AdminScreen(
         DashboardItemData(
             title = "Facilities",
             imageResId = R.drawable.ic_launcher_background,
-            backgroundColor = Color(0xFF6A5ACD),
+            backgroundColor = Color(0xFF5553DC),
             destinationRoute = "facilities_management"
         ),
         DashboardItemData(
             title = "Users",
             imageResId = R.drawable.ic_launcher_background,
-            backgroundColor = Color(0xFF6A5ACD),
+            backgroundColor = Color(0xFF5553DC),
             destinationRoute = "user_management"
         ),
         DashboardItemData(
             title = "Bookings",
             imageResId = R.drawable.ic_launcher_background,
-            backgroundColor = Color(0xFF6A5ACD),
+            backgroundColor = Color(0xFF5553DC),
             destinationRoute = "booking_management"
         ),
         DashboardItemData(
             title = "Report",
             imageResId = R.drawable.ic_launcher_background,
-            backgroundColor = Color(0xFF6A5ACD),
+            backgroundColor = Color(0xFF5553DC),
             destinationRoute = "report_generation"
+        ),
+        DashboardItemData(
+            title = "Statistics",
+            imageResId = R.drawable.ic_launcher_background,
+            backgroundColor = Color(0xFF5553DC),
+            destinationRoute = "booking_statistics"
         )
     )
 

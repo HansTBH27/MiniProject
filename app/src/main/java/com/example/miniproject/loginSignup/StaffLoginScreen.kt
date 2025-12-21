@@ -78,7 +78,7 @@ fun StaffLoginScreen(navController: NavController) {
         ) {
             Image(
                 painter = painterResource(id = R.drawable.logo),
-                contentDescription = "Uniserve Logo",
+                contentDescription = "SFBS Logo",
                 modifier = Modifier.size(100.dp)
             )
         }
@@ -143,16 +143,16 @@ fun StaffLoginScreen(navController: NavController) {
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // 邮箱输入
+            // Email or ID input
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it; errorMessage = "" },
-                label = { Text("Staff Email") },
-                placeholder = { Text("staff@university.edu") },
+                label = { Text("Email or Staff ID") },
+                placeholder = { Text("staff@university.edu or STF-XXXXXX") },
                 leadingIcon = {
                     Image(
                         painter = painterResource(id = R.drawable.mail),
-                        contentDescription = "Email",
+                        contentDescription = "Email or ID",
                         modifier = Modifier.size(20.dp)
                     )
                 },
@@ -162,7 +162,7 @@ fun StaffLoginScreen(navController: NavController) {
                     focusedBorderColor = primaryColor,
                     focusedLabelColor = primaryColor
                 ),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -254,22 +254,39 @@ fun StaffLoginScreen(navController: NavController) {
                         isLoading = true
                         errorMessage = ""
 
-                        // 使用协程作用域替代 LaunchedEffect
+                        // Use Firebase Authentication - supports both email and ID
                         CoroutineScope(Dispatchers.Main).launch {
                             try {
-                                // TODO: 这里替换为实际的 Firebase 登录逻辑
-                                kotlinx.coroutines.delay(1500) // 模拟网络请求
-
-                                // 简单的验证逻辑
-                                if (email.contains("staff") && password.length >= 6) {
-                                    // 登录成功
-                                    navController.navigate("home") {
-                                        popUpTo("staffLogin") { inclusive = true }
-                                    }
+                                val authRepository = com.example.miniproject.auth.AuthRepository()
+                                val input = email.trim()
+                                
+                                // Detect if input is email (contains @) or ID
+                                val authResult = if (input.contains("@")) {
+                                    // It's an email
+                                    authRepository.signIn(input, password)
                                 } else {
-                                    errorMessage = "Invalid credentials. Use staff email and password (min 6 chars)"
+                                    // It's an ID (displayId)
+                                    authRepository.signInByDisplayId(input, password)
                                 }
-                            } finally {
+                                
+                                // Get user data to verify role
+                                authResult.user?.uid?.let { uid ->
+                                    val userData = authRepository.getUserData(uid)
+                                    if (userData != null && userData.role == "staff") {
+                                        // Login successful - navigate to main screen
+                                        navController.navigate("main") {
+                                            popUpTo("login") { inclusive = true }
+                                        }
+                                    } else {
+                                        errorMessage = "This account is not authorized for staff login"
+                                        isLoading = false
+                                    }
+                                } ?: run {
+                                    errorMessage = "Login failed. Please check your credentials."
+                                    isLoading = false
+                                }
+                            } catch (e: Exception) {
+                                errorMessage = "Login failed: ${e.message ?: "Invalid credentials"}"
                                 isLoading = false
                             }
                         }

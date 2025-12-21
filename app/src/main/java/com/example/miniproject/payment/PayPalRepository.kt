@@ -1,4 +1,4 @@
-package com.example.goyumapp.payment
+package com.example.miniproject.payment
 
 import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.functions.ktx.functions

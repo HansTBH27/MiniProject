@@ -50,7 +50,7 @@ fun AdminStudentScreen(
                 onClick = {
                     showAddUserDialog = true
                 },
-                containerColor = Color(0xFF6A5ACD),
+                containerColor = Color(0xFF5553DC),
                 modifier = Modifier.padding(16.dp)
             ) {
                 Icon(
@@ -89,7 +89,7 @@ fun AdminStudentScreen(
                                     modifier = Modifier.fillMaxSize(),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    CircularProgressIndicator(color = Color(0xFF6A5ACD))
+                                    CircularProgressIndicator(color = Color(0xFF5553DC))
                                 }
                             }
 

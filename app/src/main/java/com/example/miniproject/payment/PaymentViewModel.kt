@@ -94,54 +94,95 @@ class PaymentViewModel : ViewModel() {
 
                 val db = Firebase.firestore
 
-                // 1. Load child facility (facilityind) - specific room
-                println("1️⃣ Loading room details: $facilityIndId")
-                try {
-                    val facilityIndDoc = db.collection("facilityind")
-                        .document(facilityIndId)
-                        .get()
-                        .await()
+                // Check if this is a facilityind ID (contains "_") or a facility ID
+                val isFacilityIndId = facilityIndId.contains("_")
+                
+                if (isFacilityIndId) {
+                    // 1. Load child facility (facilityind) - specific room
+                    println("1️⃣ Loading room details: $facilityIndId")
+                    try {
+                        val facilityIndDoc = db.collection("facilityind")
+                            .document(facilityIndId)
+                            .get()
+                            .await()
 
-                    if (facilityIndDoc.exists()) {
-                        facilityInd = facilityIndDoc.data
-                        println("✅ Room loaded: ${facilityInd?.get("name")}")
-                    } else {
-                        errorMessage = "Room not found: $facilityIndId"
-                        isLoading = false
-                        return@launch
+                        if (facilityIndDoc.exists()) {
+                            facilityInd = facilityIndDoc.data
+                            println("✅ Room loaded: ${facilityInd?.get("name")}")
+                        } else {
+                            errorMessage = "Room not found: $facilityIndId"
+                            isLoading = false
+                            return@launch
+                        }
+
+                        // 2. Extract and load parent facility (facility) - facility type
+                        val parentFacilityId = extractParentFacilityId(facilityIndId)
+                        println("2️⃣ Loading facility type: $parentFacilityId")
+
+                        if (parentFacilityId != null) {
+                            val facilityDoc = db.collection("facility")
+                                .document(parentFacilityId)
+                                .get()
+                                .await()
+
+                            if (facilityDoc.exists()) {
+                                facility = facilityDoc.data
+                                println("✅ Facility type loaded: ${facility?.get("name")}")
+                            }
+                        }
+                    } catch (e: Exception) {
+                        errorMessage = "Error loading facility: ${e.message}"
+                        println("❌ Error: ${e.message}")
                     }
-
-                    // 2. Extract and load parent facility (facility) - facility type
-                    val parentFacilityId = extractParentFacilityId(facilityIndId)
-                    println("2️⃣ Loading facility type: $parentFacilityId")
-
-                    if (parentFacilityId != null) {
+                } else {
+                    // This is a facility ID (not facilityind) - load facility directly
+                    println("1️⃣ Loading facility directly: $facilityIndId")
+                    try {
                         val facilityDoc = db.collection("facility")
-                            .document(parentFacilityId)
+                            .document(facilityIndId)
                             .get()
                             .await()
 
                         if (facilityDoc.exists()) {
                             facility = facilityDoc.data
-                            println("✅ Facility type loaded: ${facility?.get("name")}")
+                            println("✅ Facility loaded: ${facility?.get("name")}")
+                            
+                            // Create a mock facilityInd from facility data for compatibility
+                            facilityInd = mapOf(
+                                "id" to facilityIndId,
+                                "name" to (facility?.get("name") ?: "Unknown"),
+                                "facilityID" to facilityIndId,
+                                "price" to 0.0, // Default price, can be updated if facility has price field
+                                "customMaxNum" to (facility?.get("maxNum") ?: 0),
+                                "customMinNum" to (facility?.get("minNum") ?: 0)
+                            )
+                            println("✅ Created facilityInd from facility data")
+                        } else {
+                            errorMessage = "Facility not found: $facilityIndId"
+                            isLoading = false
+                            return@launch
                         }
+                    } catch (e: Exception) {
+                        errorMessage = "Error loading facility: ${e.message}"
+                        println("❌ Error: ${e.message}")
                     }
-                } catch (e: Exception) {
-                    errorMessage = "Error loading facility: ${e.message}"
-                    println("❌ Error: ${e.message}")
                 }
 
                 // 3. Load equipment items
                 if (equipmentData.isNotEmpty()) {
                     println("3️⃣ Loading equipment: ${equipmentData.size} items")
+                    println("   Equipment data strings: $equipmentData")
                     val items = mutableListOf<EquipmentItem>()
 
                     equipmentData.forEach { data ->
+                        println("   Processing equipment data: '$data'")
                         val parts = data.split(":")
 
                         if (parts.size == 2) {
                             val equipmentId = parts[0].trim()
-                            val purchaseQuantity = parts[1].toIntOrNull() ?: 1
+                            val purchaseQuantity = parts[1].trim().toIntOrNull() ?: 1
+
+                            println("   Looking for equipment ID: '$equipmentId', quantity: $purchaseQuantity")
 
                             try {
                                 val equipmentDoc = db.collection("equipment")
@@ -166,19 +207,28 @@ class PaymentViewModel : ViewModel() {
                                             name = name,
                                             unitPrice = unitPrice,
                                             purchaseQuantity = purchaseQuantity,
-                                            facilityID = ""
+                                            facilityID = equipment["facilityID"] as? String ?: ""
                                         )
                                     )
 
-                                    println("   ✅ Equipment: $name x$purchaseQuantity")
+                                    println("   ✅ Equipment loaded: $name x$purchaseQuantity @ RM$unitPrice each")
+                                } else {
+                                    println("   ⚠️ Equipment document not found: $equipmentId")
                                 }
                             } catch (e: Exception) {
-                                println("   ⚠️ Error loading equipment: ${e.message}")
+                                println("   ❌ Error loading equipment '$equipmentId': ${e.message}")
+                                e.printStackTrace()
                             }
+                        } else {
+                            println("   ⚠️ Invalid equipment data format: '$data' (expected 'id:quantity')")
                         }
                     }
 
                     equipmentItems = items
+                    println("✅ Loaded ${items.size} equipment items out of ${equipmentData.size} requested")
+                } else {
+                    println("ℹ️ No equipment data provided")
+                    equipmentItems = emptyList()
                 }
 
                 // 4. Set booking times

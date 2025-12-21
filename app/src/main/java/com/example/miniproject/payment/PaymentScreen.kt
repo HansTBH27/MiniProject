@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.goyumapp.payment.PayPalRepository
+import com.example.miniproject.payment.PayPalRepository
 import com.example.miniproject.R
 import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
@@ -56,17 +56,25 @@ fun PaymentScreen(
     println("   equipmentData: '$equipmentData'")
 
     // Parse equipment data into list
-    val equipmentList = if (equipmentData.isNotEmpty()) {
-        equipmentData.split(",").filter { it.isNotEmpty() }
+    // Format: "equipmentId:quantity,equipmentId:quantity" or "NONE"
+    val equipmentList = if (equipmentData.isNotEmpty() && equipmentData != "NONE") {
+        equipmentData.split(",").filter { it.isNotEmpty() && it.contains(":") }
     } else {
         emptyList()
     }
 
     println("   Parsed equipment list: $equipmentList")
+    println("   Equipment data string: '$equipmentData'")
 
     // Convert milliseconds to Firebase Timestamp
     val startTimestamp = if (startTime > 0) {
-        Timestamp(startTime / 1000, 0)
+        try {
+            val date = Date(startTime)
+            Timestamp(date)
+        } catch (e: Exception) {
+            println("⚠️ Error creating timestamp from $startTime: ${e.message}")
+            null
+        }
     } else {
         null
     }
@@ -78,15 +86,10 @@ fun PaymentScreen(
         null
     }
 
-    // Payment method selection state
-    var isPayPalSelected by remember { mutableStateOf(false) }
-
-    // PayPal processing states
+    // Booking processing states
     var isProcessingPayment by remember { mutableStateOf(false) }
     var paymentError by remember { mutableStateOf<String?>(null) }
 
-    // PayPal repository
-    val paypalRepository = remember { PayPalRepository() }
     val scope = rememberCoroutineScope()
 
     // Load payment data
@@ -110,7 +113,7 @@ fun PaymentScreen(
             .fillMaxSize()
             .background(
                 brush = Brush.verticalGradient(
-                    colors = listOf(Color(0xFF483D8B), Color(0xFF6A5ACD))
+                    colors = listOf(Color(0xFF5553DC), Color(0xFF5553DC))
                 )
             )
     ) {
@@ -128,13 +131,22 @@ fun PaymentScreen(
         } else if (viewModel.errorMessage != null) {
             // Error state
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                Icon(
+                    imageVector = Icons.Filled.Error,
+                    contentDescription = "Error",
+                    tint = Color.Red,
+                    modifier = Modifier.size(64.dp)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "Error Loading Data",
-                    color = Color.Red,
+                    color = Color.White,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -143,7 +155,6 @@ fun PaymentScreen(
                     text = viewModel.errorMessage ?: "Unknown error",
                     color = Color.White,
                     fontSize = 14.sp,
-                    modifier = Modifier.padding(horizontal = 32.dp),
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
                 )
                 Spacer(modifier = Modifier.height(16.dp))
@@ -160,7 +171,7 @@ fun PaymentScreen(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.White)
                 ) {
-                    Text("Retry", color = Color(0xFF6A5ACD))
+                    Text("Retry", color = Color(0xFF5553DC))
                 }
             }
         } else if (facilityIndId.isEmpty()) {
@@ -189,7 +200,7 @@ fun PaymentScreen(
                     onClick = { navController.popBackStack() },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.White)
                 ) {
-                    Text("Go Back", color = Color(0xFF6A5ACD))
+                    Text("Go Back", color = Color(0xFF5553DC))
                 }
             }
         } else {
@@ -246,17 +257,13 @@ fun PaymentScreen(
                                 text = String.format("RM %.2f", totalAmount),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 20.sp,
-                                color = Color(0xFF6A5ACD)
+                                color = Color(0xFF5553DC)
                             )
                         }
 
                         Spacer(modifier = Modifier.height(24.dp))
 
-                        // 4. Payment Method Selection
-                        PaymentMethod(
-                            isSelected = isPayPalSelected,
-                            onSelect = { isPayPalSelected = it }
-                        )
+                        // Payment method removed - booking goes directly to confirmation
 
                         // Show payment error if any
                         if (paymentError != null) {
@@ -304,43 +311,31 @@ fun PaymentScreen(
                 ) {
                     Button(
                         onClick = {
-                            if (isPayPalSelected && !isProcessingPayment) {
-                                val total = viewModel.calculateTotal()
+                            if (!isProcessingPayment) {
                                 paymentError = null // Reset error
                                 isProcessingPayment = true
 
                                 scope.launch {
                                     try {
-                                        println("💳 Creating PayPal order for RM $total")
-
-                                        // Step 1: Create PayPal order via Firebase Cloud Function
-                                        val orderResult = paypalRepository.createOrder(
-                                            amount = String.format("%.2f", total),
-                                            currency = "MYR",
-                                            description = "Facility Booking - ${viewModel.getFacilityIndName()}"
+                                        println("💳 Creating booking directly (payment removed)")
+                                        
+                                        // Create booking directly without payment
+                                        viewModel.createFreeBooking(
+                                            userId = userId,
+                                            onSuccess = { reservationId ->
+                                                println("✅ Booking created: $reservationId")
+                                                isProcessingPayment = false
+                                                // Navigate to booking confirmation
+                                                navController.navigate("booking_success") {
+                                                    popUpTo("payment") { inclusive = true }
+                                                }
+                                            },
+                                            onError = { error ->
+                                                println("❌ Booking failed: $error")
+                                                paymentError = error
+                                                isProcessingPayment = false
+                                            }
                                         )
-
-                                        if (orderResult.isSuccess) {
-                                            val order = orderResult.getOrNull()!!
-                                            println("✅ Order created: ${order.orderId}")
-                                            println("🔗 Approval URL: ${order.approvalUrl}")
-
-                                            // Step 2: Navigate to PayPal WebView screen
-                                            // Encode the approval URL to handle special characters
-                                            val encodedUrl = java.net.URLEncoder.encode(order.approvalUrl, "UTF-8")
-
-                                            val endTimeMillis = startTime + (bookedHours * 3600 * 1000).toLong()
-                                            navController.navigate(
-                                                "payment_paypal/${order.orderId}/$encodedUrl/$userId/$facilityIndId/$equipmentData/$startTime/$bookedHours"
-                                            )
-
-                                            isProcessingPayment = false
-                                        } else {
-                                            val error = orderResult.exceptionOrNull()
-                                            println("❌ Order creation failed: ${error?.message}")
-                                            paymentError = error?.message ?: "Failed to create order"
-                                            isProcessingPayment = false
-                                        }
                                     } catch (e: Exception) {
                                         println("❌ Error: ${e.message}")
                                         paymentError = e.message ?: "An error occurred"
@@ -354,12 +349,12 @@ fun PaymentScreen(
                             .height(56.dp),
                         shape = RoundedCornerShape(28.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isPayPalSelected && !isProcessingPayment)
-                                Color(0xFF6A5ACD)
+                            containerColor = if (!isProcessingPayment && viewModel.errorMessage == null)
+                                Color(0xFF5553DC)
                             else
                                 Color(0xFFCCCCCC)
                         ),
-                        enabled = isPayPalSelected && !isProcessingPayment
+                        enabled = !isProcessingPayment && viewModel.errorMessage == null
                     ) {
                         if (isProcessingPayment) {
                             Row(
@@ -381,7 +376,7 @@ fun PaymentScreen(
                             }
                         } else {
                             Text(
-                                "Proceed to PayPal",
+                                "Confirm Booking",
                                 color = Color.White,
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.SemiBold
@@ -789,7 +784,7 @@ fun FreeBookingScreen(
             .fillMaxSize()
             .background(
                 brush = Brush.verticalGradient(
-                    colors = listOf(Color(0xFF483D8B), Color(0xFF6A5ACD))
+                    colors = listOf(Color(0xFF5553DC), Color(0xFF5553DC))
                 )
             )
     ) {
@@ -976,7 +971,7 @@ fun FreeBookingScreen(
                         shape = RoundedCornerShape(28.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = if (validationError == null && !isProcessing)
-                                Color(0xFF6A5ACD)  // Always purple when valid
+                                Color(0xFF5553DC)  // Always purple when valid
                             else
                                 Color(0xFFCCCCCC)  // Gray when disabled
                         ),

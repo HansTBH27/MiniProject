@@ -78,7 +78,7 @@ fun AdminLoginScreen(navController: NavController) {
         ) {
             Image(
                 painter = painterResource(id = R.drawable.logo),
-                contentDescription = "Uniserve Logo",
+                contentDescription = "SFBS Logo",
                 modifier = Modifier.size(100.dp)
             )
         }
@@ -157,8 +157,9 @@ fun AdminLoginScreen(navController: NavController) {
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         errorMessage,
-                        fontSize = 14.sp,
-                        color = Color(0xFFD32F2F)
+                        fontSize = 12.sp,
+                        color = if (errorMessage.contains("To find") || errorMessage.contains("Firebase")) Color(0xFF2196F3) else Color(0xFFD32F2F),
+                        lineHeight = 18.sp
                     )
                 }
             }
@@ -171,16 +172,16 @@ fun AdminLoginScreen(navController: NavController) {
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // 邮箱输入
+            // Email or ID input
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it; errorMessage = "" },
-                label = { Text("Admin Email") },
-                placeholder = { Text("admin@university.edu") },
+                label = { Text("Email or Admin ID") },
+                placeholder = { Text("admin@university.edu or Admin ID") },
                 leadingIcon = {
                     Image(
                         painter = painterResource(id = R.drawable.mail),
-                        contentDescription = "Email",
+                        contentDescription = "Email or ID",
                         modifier = Modifier.size(20.dp)
                     )
                 },
@@ -190,7 +191,7 @@ fun AdminLoginScreen(navController: NavController) {
                     focusedBorderColor = primaryColor,
                     focusedLabelColor = primaryColor
                 ),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -272,22 +273,39 @@ fun AdminLoginScreen(navController: NavController) {
                         isLoading = true
                         errorMessage = ""
 
-                        // 使用协程作用域替代 LaunchedEffect
+                        // Use Firebase Authentication - supports both email and ID
                         CoroutineScope(Dispatchers.Main).launch {
                             try {
-                                // TODO: 这里替换为实际的 Firebase 登录逻辑
-                                kotlinx.coroutines.delay(1500) // 模拟网络请求
-
-                                // 简单的验证逻辑
-                                if (email.contains("admin") && password.length >= 8) {
-                                    // 登录成功
-                                    navController.navigate("admin") {
-                                        popUpTo("adminLogin") { inclusive = true }
-                                    }
+                                val authRepository = com.example.miniproject.auth.AuthRepository()
+                                val input = email.trim()
+                                
+                                // Detect if input is email (contains @) or ID
+                                val authResult = if (input.contains("@")) {
+                                    // It's an email
+                                    authRepository.signIn(input, password)
                                 } else {
-                                    errorMessage = "Invalid credentials. Use admin email and password (min 8 chars)"
+                                    // It's an ID (displayId)
+                                    authRepository.signInByDisplayId(input, password)
                                 }
-                            } finally {
+                                
+                                // Get user data to verify role
+                                authResult.user?.uid?.let { uid ->
+                                    val userData = authRepository.getUserData(uid)
+                                    if (userData != null && userData.role == "admin") {
+                                        // Login successful - navigate to admin screen
+                                        navController.navigate("admin") {
+                                            popUpTo("login") { inclusive = true }
+                                        }
+                                    } else {
+                                        errorMessage = "This account is not authorized for admin login"
+                                        isLoading = false
+                                    }
+                                } ?: run {
+                                    errorMessage = "Login failed. Please check your credentials."
+                                    isLoading = false
+                                }
+                            } catch (e: Exception) {
+                                errorMessage = "Login failed: ${e.message ?: "Invalid credentials"}"
                                 isLoading = false
                             }
                         }
@@ -317,7 +335,25 @@ fun AdminLoginScreen(navController: NavController) {
                 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Forgot Admin ID - Help Button
+            TextButton(
+                onClick = {
+                    // Show dialog with instructions
+                    CoroutineScope(Dispatchers.Main).launch {
+                        errorMessage = "To find your admin ID:\n1. Check Firebase Console > Firestore > 'user' collection\n2. Look for document with role='admin'\n3. Use the 'displayId' or 'email' field to login\n\nOr create new admin via Firebase Console"
+                    }
+                }
+            ) {
+                Text(
+                    "Forgot Admin ID?",
+                    color = primaryColor,
+                    fontSize = 14.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             // 安全密钥切换
             TextButton(
@@ -326,6 +362,26 @@ fun AdminLoginScreen(navController: NavController) {
                 Text(
                     if (showSecurityKey) "Hide Security Key" else "Need Security Key?",
                     color = Color.Gray
+                )
+            }
+            
+            // TEMPORARY: Direct Admin Access Button (Remove in production)
+            Spacer(modifier = Modifier.height(8.dp))
+            TextButton(
+                onClick = {
+                    // Direct navigation to admin screen (TEMPORARY - for development only)
+                    navController.navigate("admin") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                },
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = Color(0xFFFF9800) // Orange to indicate this is temporary
+                )
+            ) {
+                Text(
+                    "⚠️ Direct Admin Access (Dev Only)",
+                    fontSize = 12.sp,
+                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
                 )
             }
         }

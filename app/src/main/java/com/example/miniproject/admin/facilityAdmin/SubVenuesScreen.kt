@@ -90,7 +90,7 @@ fun SubVenuesScreen(
             if (mainFacilityId != null) {
                 FloatingActionButton(
                     onClick = { showAddSubVenueDialog = true },
-                    containerColor = Color(0xFF6A5ACD),
+                    containerColor = Color(0xFF5553DC),
                     contentColor = Color.White,
                     modifier = Modifier.padding(bottom = 72.dp)
                 ) {
@@ -122,7 +122,7 @@ fun SubVenuesScreen(
                             navController.popBackStack()
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A5ACD))
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5553DC))
                 ) {
                     Text("Done", color = Color.White)
                 }
@@ -422,7 +422,7 @@ fun AddSubVenueDialog(
 
                         onConfirm(subVenueName, customMin, customMax)
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A5ACD)),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5553DC)),
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     enabled = subVenueName.isNotBlank()
@@ -463,7 +463,7 @@ fun ConfirmChangesDialog(
         confirmButton = {
             Button(
                 onClick = onConfirm,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A5ACD))
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5553DC))
             ) {
                 Text("Save & Exit", color = Color.White)
             }
@@ -599,7 +599,7 @@ fun ExpandableSubVenueCard(
                         Text(
                             text = "Custom Capacity: ${if (min == max) "$min" else "$min - $max"}",
                             fontSize = 11.sp,
-                            color = Color(0xFF6A5ACD),
+                            color = Color(0xFF5553DC),
                             fontWeight = FontWeight.Medium
                         )
                     }

@@ -42,7 +42,7 @@ fun SearchBookingByDateScreen(
             .fillMaxSize()
             .background(
                 brush = Brush.verticalGradient(
-                    colors = listOf(Color(0xFF483D8B), Color(0xFF6A5ACD))
+                    colors = listOf(Color(0xFF5553DC), Color(0xFF5553DC))
                 )
             )
     ) {
@@ -415,7 +415,7 @@ private fun ReservationCard(
                             2.0 -> Color(0xFF4CAF50)  // Green
                             2.5 -> Color(0xFF8BC34A)  // Light Green
                             3.0 -> Color(0xFFFF9800)  // Orange
-                            else -> Color(0xFF6A5ACD)
+                            else -> Color(0xFF5553DC)
                         },
                         shape = RoundedCornerShape(16.dp)
                     ) {

@@ -70,7 +70,7 @@ fun Dashboard(
                 brush = Brush.verticalGradient(
                     colors = listOf(
                         Color(0xFF483D8B), // DarkSlateBlue
-                        Color(0xFF6A5ACD)  // SlateBlue
+                        Color(0xFF5553DC)
                     )
                 )
             )

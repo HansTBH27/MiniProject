@@ -626,7 +626,7 @@ fun AddEditReservationScreen(
             .fillMaxSize()
             .background(
                 brush = Brush.verticalGradient(
-                    colors = listOf(Color(0xFF483D8B), Color(0xFF6A5ACD))
+                    colors = listOf(Color(0xFF5553DC), Color(0xFF5553DC))
                 )
             )
     ) {

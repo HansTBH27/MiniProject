@@ -25,7 +25,7 @@ fun HomeScreen(navController: NavController) {
             TopAppBar(
                 title = {
                     Text(
-                        text = "UniServe Home",
+                        text = "SFBS Home",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
@@ -61,7 +61,7 @@ fun HomeScreen(navController: NavController) {
                 ) {
                     // Welcome text
                     Text(
-                        text = "Welcome to UniServe",
+                        text = "Welcome to SFBS",
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
                         color = primaryColor
@@ -309,7 +309,7 @@ fun HomeScreen(navController: NavController) {
 
                     // Footer text
                     Text(
-                        text = "UniServe v1.0.0",
+                        text = "SFBS Smart Facility Booking System v1.0.0",
                         fontSize = 12.sp,
                         color = Color.Gray.copy(alpha = 0.7f)
                     )

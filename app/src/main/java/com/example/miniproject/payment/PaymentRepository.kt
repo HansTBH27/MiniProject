@@ -6,7 +6,7 @@ import kotlinx.coroutines.tasks.await
 
 class PaymentRepository {
 
-    private val paymentsCollection = FirebaseManager.firestore.collection("payments")
+    private val paymentsCollection = FirebaseManager.firestore.collection("payment")
 
     /**
      * Creates a new payment document using the ID provided within the payment object.

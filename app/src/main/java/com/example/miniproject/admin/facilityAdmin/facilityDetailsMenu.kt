@@ -295,7 +295,7 @@ fun FacilityDetailScreen(
                             }
                             Button(
                                 onClick = { showConfirmDialog = true },
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A5ACD)),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5553DC)),
                                 modifier = Modifier.weight(1f)
                             ) {
                                 Text("Modify", fontSize = 14.sp, color = Color.White)
@@ -518,7 +518,7 @@ fun EquipmentScreen(
                 }
                 Button(
                     onClick = { showConfirmChangesDialog = true },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A5ACD))
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5553DC))
                 ) {
                     Text("Save", color = Color.White)
                 }
@@ -528,7 +528,7 @@ fun EquipmentScreen(
         // Floating Action Button
         androidx.compose.material3.FloatingActionButton(
             onClick = { showAddEquipmentDialog = true },
-            containerColor = Color(0xFF6A5ACD),
+            containerColor = Color(0xFF5553DC),
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp)
@@ -818,7 +818,7 @@ fun ConfirmEquipmentChangesDialog(
                     }
                     Button(
                         onClick = onConfirm,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A5ACD)),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5553DC)),
                         enabled = hasChanges
                     ) {
                         Text("Confirm", color = Color.White)
@@ -1001,7 +1001,7 @@ fun AddEquipmentDialog(
                             onConfirm(equipmentName, finalPrice, quantity)
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A5ACD)),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5553DC)),
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     enabled = equipmentName.isNotBlank() && priceDigits.isNotBlank() && quantity.isNotBlank()
@@ -1090,7 +1090,7 @@ fun TimePickerDialog(
                     }
                     Button(
                         onClick = { onSave("$selectedHour$selectedMinute") },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A5ACD))
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5553DC))
                     ) {
                         Text("Save", color = Color.White)
                     }
@@ -1208,7 +1208,7 @@ fun CapacityModificationDialog(
                                 onSave(minNumText.toIntOrNull() ?: 0, maxNumText.toIntOrNull() ?: 0)
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A5ACD))
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5553DC))
                     ) {
                         Text("Save", color = Color.White)
                     }
@@ -1278,7 +1278,7 @@ fun ModificationDialog(
                     }
                     Button(
                         onClick = { onSave(text) },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A5ACD))
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5553DC))
                     ) {
                         Text("Save", color = Color.White)
                     }
@@ -1346,7 +1346,7 @@ fun ConfirmChangesDialog(
                     }
                     Button(
                         onClick = onConfirm,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A5ACD)),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5553DC)),
                         enabled = changes.isNotEmpty()
                     ) {
                         Text("Confirm", color = Color.White)

@@ -13,31 +13,31 @@ fun AdminFacilityScreen(navController: NavController) {
         DashboardItemData(
             title = "Sport Complex",
             imageResId = R.drawable.ic_launcher_background, // Replace with your actual image
-            backgroundColor = Color(0xFF6A5ACD),
+            backgroundColor = Color(0xFF5553DC),
             destinationRoute = "sport_complex"
         ),
         DashboardItemData(
             title = "Clubhouse",
             imageResId = R.drawable.ic_launcher_background, // Replace with your actual image
-            backgroundColor = Color(0xFF6A5ACD),
+            backgroundColor = Color(0xFF5553DC),
             destinationRoute = "clubhouse"
         ),
         DashboardItemData(
             title = "Library",
             imageResId = R.drawable.ic_launcher_background, // Replace with your actual image
-            backgroundColor = Color(0xFF6A5ACD),
+            backgroundColor = Color(0xFF5553DC),
             destinationRoute = "library"
         ),
         DashboardItemData(
             title = "Cyber Centre, CITC",
             imageResId = R.drawable.ic_launcher_background, // Replace with your actual image
-            backgroundColor = Color(0xFF6A5ACD),
+            backgroundColor = Color(0xFF5553DC),
             destinationRoute = "citc"
         ),
         DashboardItemData(
             title = "Arena TARUMT",
             imageResId = R.drawable.ic_launcher_background, // Replace with your actual image
-            backgroundColor = Color(0xFF6A5ACD),
+            backgroundColor = Color(0xFF5553DC),
             destinationRoute = "arena_tarumt"
         )
     )

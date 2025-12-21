@@ -37,7 +37,7 @@ fun ArenaTarumtSportScreen(
         DashboardItemData(
             title = facility.name,
             imageResId = R.drawable.ic_launcher_background,
-            backgroundColor = Color(0xFF6A5ACD),
+            backgroundColor = Color(0xFF5553DC),
             destinationRoute = "facility_detail/$encodedName"
         )
     }
@@ -50,7 +50,7 @@ fun ArenaTarumtSportScreen(
                     // This will create IDs like AS1, AS2, AS3, etc.
                     navController.navigate("add_facility/AS")
                 },
-                containerColor = Color(0xFF6A5ACD),
+                containerColor = Color(0xFF5553DC),
                 contentColor = Color.White
             ) {
                 Icon(

@@ -1,16 +1,18 @@
 package com.example.miniproject
 
-import BookingFailedScreen
+import com.example.miniproject.payment.BookingFailedScreen
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.booking.BookingSuccessScreen
+import com.example.miniproject.payment.BookingConfirmationScreen
 import com.example.miniproject.admin.AdminScreen
+import com.example.miniproject.admin.BookingStatisticsScreen
 import com.example.miniproject.admin.bookingAdmin.AddEditReservationScreen
 import com.example.miniproject.admin.bookingAdmin.AdminBookingScreen
 import com.example.miniproject.admin.bookingAdmin.SearchBookingByDateScreen
@@ -51,12 +53,68 @@ private fun formatTime(timestamp: Long): String {
 @Composable
 fun AppNavigation(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
+    
+    // Check authentication state to determine start destination
+    val isAuthenticated = remember {
+        com.example.miniproject.auth.FirebaseManager.auth.currentUser != null
+    }
+    val startDestination = if (isAuthenticated) "main" else "login"
 
     NavHost(
         navController = navController,
-        startDestination = "admin",
+        startDestination = startDestination,
         modifier = modifier
     ) {
+        // ==================== LOGIN/SIGNUP ROUTES ====================
+        composable("login") {
+            com.example.miniproject.loginSignup.LoginSelectionScreen(navController = navController)
+        }
+        
+        composable("studentLogin") {
+            com.example.miniproject.loginSignup.StudentLoginScreen(navController = navController)
+        }
+        
+        composable("staffLogin") {
+            com.example.miniproject.loginSignup.StaffLoginScreen(navController = navController)
+        }
+        
+        composable("adminLogin") {
+            com.example.miniproject.loginSignup.AdminLoginScreen(navController = navController)
+        }
+        
+        composable("signup/{userType}") { backStackEntry ->
+            val userType = backStackEntry.arguments?.getString("userType") ?: "Student"
+            com.example.miniproject.loginSignup.SignUpScreen(
+                navController = navController,
+                userType = userType
+            )
+        }
+
+        // ==================== USER MAIN SCREEN (with bottom nav) ====================
+        composable("main") {
+            com.example.miniproject.user.MainScreen(navController = navController)
+        }
+        
+        composable("bookNow/{facilityId}") { backStackEntry ->
+            val facilityId = backStackEntry.arguments?.getString("facilityId") ?: ""
+            com.example.miniproject.user.screens.BookNowScreen(
+                facilityId = facilityId,
+                navController = navController
+            )
+        }
+        
+        composable("user_facility_detail/{facilityId}") { backStackEntry ->
+            val facilityId = backStackEntry.arguments?.getString("facilityId") ?: ""
+            com.example.miniproject.user.screens.FacilityDetailScreen(
+                facilityId = facilityId,
+                navController = navController
+            )
+        }
+        
+        composable("my_booking") {
+            com.example.miniproject.user.screens.MyBookingScreen(navController = navController)
+        }
+        
         // ==================== HOME ====================
         composable("home") {
             HomeScreen(navController = navController)
@@ -81,10 +139,15 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             val startTime = backStackEntry.arguments?.getLong("startTime") ?: 0L
             val bookedHours = backStackEntry.arguments?.getFloat("bookedHours")?.toDouble() ?: 1.0
 
-            // Convert equipment format
-            val equipmentData = equipmentDataRaw
-                .replace("_", ",")
-                .replace("-", ":")
+            // URL decode equipment data (Navigation Compose auto-decodes, but handle edge cases)
+            val equipmentData = try {
+                java.net.URLDecoder.decode(equipmentDataRaw, "UTF-8")
+            } catch (e: Exception) {
+                // Fallback: replace if URL decoding fails
+                equipmentDataRaw
+                    .replace("_", ",")
+                    .replace("-", ":")
+            }
 
             // Debug logging
             println("📋 PAYMENT ROUTE:")
@@ -163,7 +226,7 @@ fun AppNavigation(modifier: Modifier = Modifier) {
 
         // Success screen (after payment or free booking)
         composable("booking_success") {
-            BookingSuccessScreen(navController)
+            BookingConfirmationScreen(navController = navController)
         }
 
         // Failure screen (if PayPal payment fails)
@@ -195,6 +258,10 @@ fun AppNavigation(modifier: Modifier = Modifier) {
 
         composable("booking_management") {
             AdminBookingScreen(navController = navController)
+        }
+        
+        composable("booking_statistics") {
+            BookingStatisticsScreen(navController = navController)
         }
 
         composable("search_booking_by_user") {

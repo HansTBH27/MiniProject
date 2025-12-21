@@ -26,10 +26,10 @@ class AuthViewModel : ViewModel(){
             }
         }
     }
-    fun signUp(email: String, password: String, name: String) {
+    fun signUp(email: String, password: String, name: String, role: String = "student", displayId: String) {
         viewModelScope.launch {
             try {
-                val authResult = repository.signUp(email, password, name)
+                val authResult = repository.signUp(email, password, name, role, displayId)
                 println("Sign-up successful!")
                 authResult.user?.uid?.let { fetchUserData(it) }
                 // TODO: Update UI state and maybe navigate.

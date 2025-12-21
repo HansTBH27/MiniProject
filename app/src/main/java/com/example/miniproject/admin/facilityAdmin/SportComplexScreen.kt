@@ -37,7 +37,7 @@ fun SportComplexScreen(
         DashboardItemData(
             title = it.name,
             imageResId = R.drawable.ic_launcher_background,
-            backgroundColor = Color(0xFF6A5ACD),
+            backgroundColor = Color(0xFF5553DC),
             destinationRoute = "facility_detail/$encodedName"
         )
     }
@@ -46,7 +46,7 @@ fun SportComplexScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { navController.navigate("add_facility/S") },
-                containerColor = Color(0xFF6A5ACD),
+                containerColor = Color(0xFF5553DC),
                 contentColor = Color.White
             ) {
                 Icon(

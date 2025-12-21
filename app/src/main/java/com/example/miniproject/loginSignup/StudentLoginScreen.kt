@@ -78,7 +78,7 @@ fun StudentLoginScreen(navController: NavController) {
         ) {
             Image(
                 painter = painterResource(id = R.drawable.logo),
-                contentDescription = "Uniserve Logo",
+                contentDescription = "SFBS Logo",
                 modifier = Modifier.size(100.dp)
             )
         }
@@ -143,16 +143,16 @@ fun StudentLoginScreen(navController: NavController) {
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // 邮箱输入
+            // Email or ID input
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it; errorMessage = "" },
-                label = { Text("Student Email") },
-                placeholder = { Text("student@university.edu") },
+                label = { Text("Email or Student ID") },
+                placeholder = { Text("student@university.edu or STU-XXXXXX") },
                 leadingIcon = {
                     Image(
                         painter = painterResource(id = R.drawable.mail),
-                        contentDescription = "Email",
+                        contentDescription = "Email or ID",
                         modifier = Modifier.size(20.dp)
                     )
                 },
@@ -162,7 +162,7 @@ fun StudentLoginScreen(navController: NavController) {
                     focusedBorderColor = primaryColor,
                     focusedLabelColor = primaryColor
                 ),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -217,22 +217,39 @@ fun StudentLoginScreen(navController: NavController) {
                         isLoading = true
                         errorMessage = ""
 
-                        // 使用协程作用域
+                        // Use Firebase Authentication - supports both email and ID
                         CoroutineScope(Dispatchers.Main).launch {
                             try {
-                                // TODO: 这里替换为实际的 Firebase 登录逻辑
-                                delay(1500) // 模拟网络请求
-
-                                // 简单的验证逻辑
-                                if (email.contains("student") && password.length >= 6) {
-                                    // 登录成功
-                                    navController.navigate("home") {
-                                        popUpTo("studentLogin") { inclusive = true }
-                                    }
+                                val authRepository = com.example.miniproject.auth.AuthRepository()
+                                val input = email.trim()
+                                
+                                // Detect if input is email (contains @) or ID
+                                val authResult = if (input.contains("@")) {
+                                    // It's an email
+                                    authRepository.signIn(input, password)
                                 } else {
-                                    errorMessage = "Invalid credentials. Use student email and password (min 6 chars)"
+                                    // It's an ID (displayId)
+                                    authRepository.signInByDisplayId(input, password)
                                 }
-                            } finally {
+                                
+                                // Get user data to verify role
+                                authResult.user?.uid?.let { uid ->
+                                    val userData = authRepository.getUserData(uid)
+                                    if (userData != null && (userData.role == "student" || userData.role == "user")) {
+                                        // Login successful - navigate to main screen
+                                        navController.navigate("main") {
+                                            popUpTo("login") { inclusive = true }
+                                        }
+                                    } else {
+                                        errorMessage = "This account is not authorized for student login"
+                                        isLoading = false
+                                    }
+                                } ?: run {
+                                    errorMessage = "Login failed. Please check your credentials."
+                                    isLoading = false
+                                }
+                            } catch (e: Exception) {
+                                errorMessage = "Login failed: ${e.message ?: "Invalid credentials"}"
                                 isLoading = false
                             }
                         }
@@ -259,40 +276,6 @@ fun StudentLoginScreen(navController: NavController) {
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
                     )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // 或者使用选项
-            Text(
-                "Or sign in with",
-                color = Color.Gray,
-                modifier = Modifier.padding(vertical = 16.dp)
-            )
-
-            // 其他登录方式 - 仅保留 Google
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = { /* Google 登录 */ },
-                    modifier = Modifier.size(50.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color(0xFFDB4437), shape = RoundedCornerShape(12.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.google),
-                            contentDescription = "Google",
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
                 }
             }
 

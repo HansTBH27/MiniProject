@@ -34,7 +34,7 @@ fun ArenaTarumtScreen(navController: NavController, viewModel: FacilityListViewM
     val sportFacilities = DashboardItemData(
         title = "Sports Facilities",
         imageResId = R.drawable.ic_launcher_background,
-        backgroundColor = Color(0xFF6A5ACD),
+        backgroundColor = Color(0xFF5553DC),
         destinationRoute = "arena_tarumt_sport"
     )
 
@@ -45,7 +45,7 @@ fun ArenaTarumtScreen(navController: NavController, viewModel: FacilityListViewM
                 DashboardItemData(
                     title = facility.name,
                     imageResId = R.drawable.ic_launcher_background,
-                    backgroundColor = Color(0xFF6A5ACD),
+                    backgroundColor = Color(0xFF5553DC),
                     destinationRoute = "facility_detail/$encodedName"
                 )
             }
@@ -58,7 +58,7 @@ fun ArenaTarumtScreen(navController: NavController, viewModel: FacilityListViewM
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { navController.navigate("add_facility/A") },
-                containerColor = Color(0xFF6A5ACD),
+                containerColor = Color(0xFF5553DC),
                 contentColor = Color.White
             ) {
                 Icon(

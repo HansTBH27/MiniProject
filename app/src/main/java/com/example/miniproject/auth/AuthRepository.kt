@@ -8,25 +8,115 @@ import kotlinx.coroutines.tasks.await
 
 class AuthRepository {
 
-    private val usersCollection = FirebaseManager.firestore.collection("users")
+    private val usersCollection = FirebaseManager.firestore.collection("user")
 
     suspend fun signIn(email: String, password: String): AuthResult {
         return FirebaseManager.auth.signInWithEmailAndPassword(email, password).await()
     }
+    
+    /**
+     * Signs in using displayId (ID) instead of email.
+     * Finds the user by displayId, gets their email, then signs in.
+     */
+    suspend fun signInByDisplayId(displayId: String, password: String): AuthResult {
+        // Find user by displayId
+        val user = findUserByDisplayId(displayId)
+            ?: throw Exception("User with ID $displayId not found")
+        
+        // Get the email from the user document
+        val email = user.email
+        if (email.isBlank()) {
+            throw Exception("User email not found for ID $displayId")
+        }
+        
+        // Sign in using email and password
+        return FirebaseManager.auth.signInWithEmailAndPassword(email, password).await()
+    }
 
-    suspend fun signUp(email: String, password: String, name: String): AuthResult {
+    /**
+     * Signs up a new user with email, password, name, role, and displayId.
+     * The displayId will be formatted based on the role:
+     * - Student: numeric only (e.g., "1001")
+     * - Staff: "S" prefix + numbers (e.g., "S1001")
+     */
+    suspend fun signUp(email: String, password: String, name: String, role: String = "student", displayId: String): AuthResult {
+        // Format displayId based on role
+        val formattedDisplayId = when (role.lowercase()) {
+            "staff" -> {
+                // Staff format: "S" + numbers (e.g., "S1001")
+                if (displayId.startsWith("S", ignoreCase = true)) {
+                    displayId.uppercase()
+                } else {
+                    "S${displayId.uppercase()}"
+                }
+            }
+            "student" -> {
+                // Student format: numbers only (e.g., "1001")
+                displayId.trim()
+            }
+            else -> {
+                // Default format
+                displayId.trim()
+            }
+        }
+        
+        // Check if displayId already exists
+        val existingUserById = findUserByDisplayId(formattedDisplayId)
+        if (existingUserById != null) {
+            throw Exception("User with ID $formattedDisplayId already exists")
+        }
+        
+        // Check if email already exists in Firestore
+        try {
+            val existingEmailQuery = usersCollection
+                .whereEqualTo("email", email.lowercase())
+                .limit(1)
+                .get()
+                .await()
+            
+            if (!existingEmailQuery.isEmpty) {
+                throw Exception("User with email $email already exists")
+            }
+        } catch (e: Exception) {
+            // If it's our custom exception, rethrow it
+            if (e.message?.contains("already exists") == true) {
+                throw e
+            }
+            // Otherwise, log but continue (query might fail for other reasons)
+            println("Warning: Could not check email existence: ${e.message}")
+        }
+        
+        // Create Firebase Auth user
         val authResult = FirebaseManager.auth.createUserWithEmailAndPassword(email, password).await()
         val firebaseUser = authResult.user
+        
         if (firebaseUser != null) {
             val newUser = User(
                 id = firebaseUser.uid,
-                displayId = "U-${firebaseUser.uid.take(6).uppercase()}",
-                email = email,
+                displayId = formattedDisplayId,
+                email = email.lowercase(), // Store email in lowercase for consistency
                 name = name,
-                role = "user"
+                role = role.lowercase()
             )
-            usersCollection.document(firebaseUser.uid).set(newUser).await()
+            
+            // Save to Firestore
+            try {
+                usersCollection.document(firebaseUser.uid).set(newUser).await()
+                println("User created successfully in Firestore: ${firebaseUser.uid}, displayId: $formattedDisplayId")
+            } catch (e: Exception) {
+                println("Error saving user to Firestore: ${e.message}")
+                // Try to delete the auth user if Firestore save fails
+                try {
+                    firebaseUser.delete().await()
+                } catch (deleteError: Exception) {
+                    println("Error deleting auth user after Firestore failure: ${deleteError.message}")
+                }
+                throw Exception("Failed to save user data: ${e.message}")
+            }
+        } else {
+            throw Exception("Failed to create authentication user")
         }
+        
         return authResult
     }
 

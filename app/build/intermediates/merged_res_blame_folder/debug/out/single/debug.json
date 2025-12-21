@@ -1,0 +1,114 @@
+[
+    {
+        "merged": "com.example.miniproject.app-merged_res-73:/drawable_key.png.flat",
+        "source": "com.example.miniproject.app-main-75:/drawable/key.png"
+    },
+    {
+        "merged": "com.example.miniproject.app-merged_res-73:/drawable_history.png.flat",
+        "source": "com.example.miniproject.app-main-75:/drawable/history.png"
+    },
+    {
+        "merged": "com.example.miniproject.app-merged_res-73:/drawable_admin.png.flat",
+        "source": "com.example.miniproject.app-main-75:/drawable/admin.png"
+    },
+    {
+        "merged": "com.example.miniproject.app-merged_res-73:/drawable_logo.png.flat",
+        "source": "com.example.miniproject.app-main-75:/drawable/logo.png"
+    },
+    {
+        "merged": "com.example.miniproject.app-merged_res-73:/drawable_arrowleft.png.flat",
+        "source": "com.example.miniproject.app-main-75:/drawable/arrowleft.png"
+    },
+    {
+        "merged": "com.example.miniproject.app-merged_res-73:/drawable_paypal_logo.png.flat",
+        "source": "com.example.miniproject.app-main-75:/drawable/paypal_logo.png"
+    },
+    {
+        "merged": "com.example.miniproject.app-merged_res-73:/drawable_user.png.flat",
+        "source": "com.example.miniproject.app-main-75:/drawable/user.png"
+    },
+    {
+        "merged": "com.example.miniproject.app-merged_res-73:/drawable_eyeoff.png.flat",
+        "source": "com.example.miniproject.app-main-75:/drawable/eyeoff.png"
+    },
+    {
+        "merged": "com.example.miniproject.app-merged_res-73:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.example.miniproject.app-main-75:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "com.example.miniproject.app-merged_res-73:/xml_backup_rules.xml.flat",
+        "source": "com.example.miniproject.app-main-75:/xml/backup_rules.xml"
+    },
+    {
+        "merged": "com.example.miniproject.app-merged_res-73:/drawable_student.png.flat",
+        "source": "com.example.miniproject.app-main-75:/drawable/student.png"
+    },
+    {
+        "merged": "com.example.miniproject.app-merged_res-73:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "com.example.miniproject.app-main-75:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "com.example.miniproject.app-merged_res-73:/drawable_mail.png.flat",
+        "source": "com.example.miniproject.app-main-75:/drawable/mail.png"
+    },
+    {
+        "merged": "com.example.miniproject.app-merged_res-73:/xml_data_extraction_rules.xml.flat",
+        "source": "com.example.miniproject.app-main-75:/xml/data_extraction_rules.xml"
+    },
+    {
+        "merged": "com.example.miniproject.app-merged_res-73:/drawable_lock.png.flat",
+        "source": "com.example.miniproject.app-main-75:/drawable/lock.png"
+    },
+    {
+        "merged": "com.example.miniproject.app-merged_res-73:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.example.miniproject.app-main-75:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "com.example.miniproject.app-merged_res-73:/drawable_google.png.flat",
+        "source": "com.example.miniproject.app-main-75:/drawable/google.png"
+    },
+    {
+        "merged": "com.example.miniproject.app-merged_res-73:/drawable_staff.png.flat",
+        "source": "com.example.miniproject.app-main-75:/drawable/staff.png"
+    },
+    {
+        "merged": "com.example.miniproject.app-merged_res-73:/drawable_ic_launcher_background.xml.flat",
+        "source": "com.example.miniproject.app-main-75:/drawable/ic_launcher_background.xml"
+    },
+    {
+        "merged": "com.example.miniproject.app-merged_res-73:/drawable_eye.png.flat",
+        "source": "com.example.miniproject.app-main-75:/drawable/eye.png"
+    },
+    {
+        "merged": "com.example.miniproject.app-merged_res-73:/drawable_department.png.flat",
+        "source": "com.example.miniproject.app-main-75:/drawable/department.png"
+    },
+    {
+        "merged": "com.example.miniproject.app-merged_res-73:/drawable_security.png.flat",
+        "source": "com.example.miniproject.app-main-75:/drawable/security.png"
+    },
+    {
+        "merged": "com.example.miniproject.app-merged_res-73:/drawable_error.png.flat",
+        "source": "com.example.miniproject.app-main-75:/drawable/error.png"
+    },
+    {
+        "merged": "com.example.miniproject.app-merged_res-73:/drawable_eyeon.png.flat",
+        "source": "com.example.miniproject.app-main-75:/drawable/eyeon.png"
+    },
+    {
+        "merged": "com.example.miniproject.app-merged_res-73:/drawable_person.png.flat",
+        "source": "com.example.miniproject.app-main-75:/drawable/person.png"
+    },
+    {
+        "merged": "com.example.miniproject.app-merged_res-73:/drawable_arrowdown.png.flat",
+        "source": "com.example.miniproject.app-main-75:/drawable/arrowdown.png"
+    },
+    {
+        "merged": "com.example.miniproject.app-merged_res-73:/drawable_phone.png.flat",
+        "source": "com.example.miniproject.app-main-75:/drawable/phone.png"
+    },
+    {
+        "merged": "com.example.miniproject.app-merged_res-73:/drawable_arrowright.png.flat",
+        "source": "com.example.miniproject.app-main-75:/drawable/arrowright.png"
+    }
+]

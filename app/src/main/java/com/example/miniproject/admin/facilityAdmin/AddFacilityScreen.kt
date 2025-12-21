@@ -186,7 +186,7 @@ fun AddFacilityScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF6A5ACD),
+                    containerColor = Color(0xFF5553DC),
                     titleContentColor = Color.White,
                     navigationIconContentColor = Color.White
                 )
@@ -239,7 +239,7 @@ fun AddFacilityScreen(
                         )
                     },
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = if (facilityNameTouched && facilityName.isBlank()) Color.Red else Color(0xFF6A5ACD),
+                        focusedBorderColor = if (facilityNameTouched && facilityName.isBlank()) Color.Red else Color(0xFF5553DC),
                         unfocusedBorderColor = if (facilityNameTouched && facilityName.isBlank()) Color.Red else Color.Gray
                     ),
                     interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
@@ -283,7 +283,7 @@ fun AddFacilityScreen(
                         )
                     },
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = if (descriptionTouched && description.isBlank()) Color.Red else Color(0xFF6A5ACD),
+                        focusedBorderColor = if (descriptionTouched && description.isBlank()) Color.Red else Color(0xFF5553DC),
                         unfocusedBorderColor = if (descriptionTouched && description.isBlank()) Color.Red else Color.Gray
                     ),
                     interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
@@ -325,7 +325,7 @@ fun AddFacilityScreen(
                         )
                     },
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = if (locationTouched && location.isBlank()) Color.Red else Color(0xFF6A5ACD),
+                        focusedBorderColor = if (locationTouched && location.isBlank()) Color.Red else Color(0xFF5553DC),
                         unfocusedBorderColor = if (locationTouched && location.isBlank()) Color.Red else Color.Gray
                     ),
                     interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
@@ -420,7 +420,7 @@ fun AddFacilityScreen(
                                         focusedBorderColor = when {
                                             hasMinCapacityError -> Color.Red
                                             capacityErrorTouched && hasRangeCapacityError -> Color.Red
-                                            else -> Color(0xFF6A5ACD)
+                                            else -> Color(0xFF5553DC)
                                         },
                                         unfocusedBorderColor = when {
                                             hasMinCapacityError -> Color.Red
@@ -475,7 +475,7 @@ fun AddFacilityScreen(
                                         focusedBorderColor = when {
                                             hasMaxCapacityError -> Color.Red
                                             capacityErrorTouched && hasRangeCapacityError -> Color.Red
-                                            else -> Color(0xFF6A5ACD)
+                                            else -> Color(0xFF5553DC)
                                         },
                                         unfocusedBorderColor = when {
                                             hasMaxCapacityError -> Color.Red
@@ -533,7 +533,7 @@ fun AddFacilityScreen(
                                 enabled = !isLoading,
                                 isError = hasSingleCapacityError,
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = if (hasSingleCapacityError) Color.Red else Color(0xFF6A5ACD),
+                                    focusedBorderColor = if (hasSingleCapacityError) Color.Red else Color(0xFF5553DC),
                                     unfocusedBorderColor = if (hasSingleCapacityError) Color.Red else Color.Gray
                                 ),
                                 interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
@@ -660,7 +660,7 @@ fun AddFacilityScreen(
                                 showConfirmDialog = true
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A5ACD)),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5553DC)),
                         modifier = Modifier.weight(1f),
                         enabled = !isLoading && isFormValid
                     ) {
@@ -750,7 +750,7 @@ fun ConfirmAddFacilityDialog(
                     }
                     Button(
                         onClick = onConfirm,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A5ACD))
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5553DC))
                     ) {
                         Text("Confirm", color = Color.White)
                     }
