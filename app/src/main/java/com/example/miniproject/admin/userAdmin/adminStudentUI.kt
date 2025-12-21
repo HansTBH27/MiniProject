@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,7 +16,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.miniproject.components.SearchResultList
 import com.example.miniproject.components.SearchScreen
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 @Composable
 fun AdminStudentScreen(
@@ -29,12 +32,17 @@ fun AdminStudentScreen(
     val error by viewModel.error.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val firestore = remember { FirebaseFirestore.getInstance() }
 
     var showAddUserDialog by remember { mutableStateOf(false) }
     var showModifyUserDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
     var modifyUserName by remember { mutableStateOf("") }
     var modifyUserEmail by remember { mutableStateOf("") }
     var modifyUserDisplayId by remember { mutableStateOf("") }
+    var deleteUserId by remember { mutableStateOf("") }
+    var deleteUserName by remember { mutableStateOf("") }
+    var isLoadingDelete by remember { mutableStateOf(false) }
 
     LaunchedEffect(error) {
         error?.let {
@@ -140,7 +148,27 @@ fun AdminStudentScreen(
                                         )
                                     },
                                     onDeleteItem = { userId ->
-                                        viewModel.deleteUser(userId)
+                                        // Fetch user name from Firebase and show delete dialog
+                                        scope.launch {
+                                            try {
+                                                isLoadingDelete = true
+                                                val document = firestore.collection("user")
+                                                    .document(userId)
+                                                    .get()
+                                                    .await()
+
+                                                val name = document.getString("name") ?: "this student"
+                                                deleteUserId = userId
+                                                deleteUserName = name
+                                                showDeleteDialog = true
+                                                isLoadingDelete = false
+                                            } catch (e: Exception) {
+                                                isLoadingDelete = false
+                                                snackbarHostState.showSnackbar(
+                                                    "Failed to load user data: ${e.message}"
+                                                )
+                                            }
+                                        }
                                     }
                                 )
                             }
@@ -148,6 +176,75 @@ fun AdminStudentScreen(
                     }
                 }
             )
+
+            // Delete Confirmation Dialog
+            if (showDeleteDialog) {
+                AlertDialog(
+                    onDismissRequest = {
+                        showDeleteDialog = false
+                        deleteUserId = ""
+                        deleteUserName = ""
+                    },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.Warning,
+                            contentDescription = "Delete Warning",
+                            tint = Color(0xFFFF5252)
+                        )
+                    },
+                    title = {
+                        Text("Delete Student?")
+                    },
+                    text = {
+                        Text("Are you sure you want to delete $deleteUserName? This action cannot be undone.")
+                    },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                viewModel.deleteUser(deleteUserId)
+                                showDeleteDialog = false
+                                scope.launch {
+                                    snackbarHostState.showSnackbar("Student deleted successfully")
+                                    // Refresh search results
+                                    if (searchText.isNotBlank()) {
+                                        viewModel.onSearch()
+                                    }
+                                }
+                                deleteUserId = ""
+                                deleteUserName = ""
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFFF5252)
+                            )
+                        ) {
+                            Text("Delete", color = Color.White)
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = {
+                                showDeleteDialog = false
+                                deleteUserId = ""
+                                deleteUserName = ""
+                            }
+                        ) {
+                            Text("Cancel")
+                        }
+                    }
+                )
+            }
+
+            // Loading overlay for delete operation
+            if (isLoadingDelete) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = Color(0xFF6A5ACD))
+                }
+            }
 
             // Add User Dialog
             AddUserDialog(
@@ -192,11 +289,10 @@ fun AdminStudentScreen(
                     modifyUserDisplayId = ""
                 },
                 onAddUser = { _, _, _, _ -> }, // Required but not used in modify mode
-                onUpdateUser = { name, email, displayId ->
+                onUpdateUser = { name, displayId ->
                     viewModel.updateUser(
                         displayId = displayId,
                         name = name,
-                        email = email,
                         onSuccess = {
                             scope.launch {
                                 snackbarHostState.showSnackbar("Student updated successfully")

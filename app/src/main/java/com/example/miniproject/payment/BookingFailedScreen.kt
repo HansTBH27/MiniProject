@@ -1,5 +1,5 @@
 // BookingFailedScreen.kt
-
+package com.example.miniproject.payment
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape

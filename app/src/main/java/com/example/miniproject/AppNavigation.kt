@@ -1,6 +1,5 @@
 package com.example.miniproject
 
-import BookingFailedScreen
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -9,7 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.booking.BookingSuccessScreen
+import com.example.miniproject.payment.BookingSuccessScreen
 import com.example.miniproject.admin.AdminScreen
 import com.example.miniproject.admin.bookingAdmin.AddEditReservationScreen
 import com.example.miniproject.admin.bookingAdmin.AdminBookingScreen
@@ -35,6 +34,7 @@ import com.example.miniproject.payment.FreeBookingScreen
 import com.example.miniproject.payment.HomeScreen
 import com.example.miniproject.payment.PayPalWebViewScreen
 import com.example.miniproject.payment.PaymentScreen
+import com.example.miniproject.payment.BookingFailedScreen
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

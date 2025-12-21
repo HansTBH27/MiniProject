@@ -1,7 +1,6 @@
 package com.example.miniproject.admin.facilityAdmin
 
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -63,7 +62,6 @@ import androidx.navigation.NavController
 import com.example.miniproject.R
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
-import androidx.compose.material3.Checkbox
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 
@@ -187,7 +185,7 @@ fun FacilityDetailScreen(
 
             if (localChanges.isNotEmpty()) {
                 Image(
-                    painter = painterResource(id = R.drawable.ic_launcher_background),
+                    painter = painterResource(id = R.drawable.fast),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()

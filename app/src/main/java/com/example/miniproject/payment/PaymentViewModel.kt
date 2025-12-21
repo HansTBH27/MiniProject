@@ -37,7 +37,7 @@ class PaymentViewModel : ViewModel() {
     var facilityInd by mutableStateOf<Map<String, Any>?>(null)
     var equipmentItems by mutableStateOf<List<EquipmentItem>>(emptyList())
     var startTime by mutableStateOf<Timestamp?>(null)
-    var bookedHours by mutableStateOf(1.0)  // CHANGED: Store hours instead of endTime
+    var bookedHours by mutableStateOf(1.0)
     var isLoading by mutableStateOf(true)
     var errorMessage by mutableStateOf<String?>(null)
 
@@ -72,7 +72,7 @@ class PaymentViewModel : ViewModel() {
         facilityIndId: String = "",
         equipmentData: List<String> = emptyList(),
         startTime: Timestamp? = null,
-        bookedHours: Double = 1.0,  // CHANGED: Accept bookedHours instead of endTime
+        bookedHours: Double = 1.0,
     ) {
         viewModelScope.launch {
             isLoading = true
@@ -183,7 +183,7 @@ class PaymentViewModel : ViewModel() {
 
                 // 4. Set booking times
                 this@PaymentViewModel.startTime = startTime
-                this@PaymentViewModel.bookedHours = bookedHours  // CHANGED
+                this@PaymentViewModel.bookedHours = bookedHours
 
                 println("📊 Summary:")
                 println("   Room: ${getFacilityIndName()}")
@@ -314,7 +314,7 @@ class PaymentViewModel : ViewModel() {
         facilityInd = null
         equipmentItems = emptyList()
         startTime = null
-        bookedHours = 1.0  // CHANGED
+        bookedHours = 1.0
         errorMessage = null
         isLoading = true
         facilityIndIdCache = ""
@@ -520,6 +520,7 @@ class PaymentViewModel : ViewModel() {
 
     /**
      * Save only reservation for free bookings (no payment)
+     * ✅ FIXED: No "id" field stored in document
      */
     private suspend fun saveFreeReservationToFirestore(
         reservationId: String,
@@ -529,16 +530,15 @@ class PaymentViewModel : ViewModel() {
         return try {
             val db = Firebase.firestore
 
-            // Create Reservation only
+            // Create Reservation only - NO "id" field
             val reservation = hashMapOf(
-                "id" to reservationId,
                 "bookedTime" to startTime,
                 "facilityID" to facilityIndId,
                 "userID" to userId,
-                "bookedHours" to bookedHours  // CHANGED: Store bookedHours
+                "bookedHours" to bookedHours
             )
 
-            // Save reservation
+            // Save reservation (document ID will be reservationId)
             val reservationRef = db.collection("reservation").document(reservationId)
             reservationRef.set(reservation).await()
 
@@ -560,6 +560,7 @@ class PaymentViewModel : ViewModel() {
 
     /**
      * Save all documents to Firestore
+     * ✅ FIXED: No "id" fields stored in documents
      */
     private suspend fun saveBookingToFirestore(
         paymentId: String,
@@ -572,30 +573,27 @@ class PaymentViewModel : ViewModel() {
         return try {
             val db = Firebase.firestore
 
-            // 1. Create Reservation - matches your Reservation data class
+            // 1. Create Reservation - NO "id" field
             val reservation = hashMapOf(
-                "id" to reservationId,
                 "bookedTime" to startTime,
                 "facilityID" to facilityIndId,
                 "userID" to userId,
-                "bookedHours" to bookedHours  // CHANGED: Store bookedHours
+                "bookedHours" to bookedHours
             )
 
-            // 2. Create Payment - matches your Payment data class
+            // 2. Create Payment - NO "id" field
             val payment = hashMapOf(
-                "id" to paymentId,
                 "date" to Timestamp.now(),
                 "totalAmount" to totalAmount,
                 "reservationID" to reservationId
             )
 
-            // 3. Create PaymentDetails - matches your PaymentDetail data class
+            // 3. Create PaymentDetails - NO "id" field
             val paymentDetails = mutableListOf<Map<String, Any>>()
 
             // Add facility as first payment detail
             paymentDetails.add(
                 hashMapOf(
-                    "id" to "${paymentId}_1",
                     "paymentId" to paymentId,
                     "equipmentId" to "",  // Empty for facility booking
                     "quantityRented" to 1
@@ -607,7 +605,6 @@ class PaymentViewModel : ViewModel() {
             equipmentItems.forEach { equipment ->
                 paymentDetails.add(
                     hashMapOf(
-                        "id" to "${paymentId}_${itemCounter}",
                         "paymentId" to paymentId,
                         "equipmentId" to equipment.id,
                         "quantityRented" to equipment.purchaseQuantity
@@ -619,18 +616,18 @@ class PaymentViewModel : ViewModel() {
             // 4. Batch write all documents
             val batch = db.batch()
 
-            // Add reservation
+            // Add reservation (document ID will be reservationId)
             val reservationRef = db.collection("reservation").document(reservationId)
             batch.set(reservationRef, reservation)
 
-            // Add payment
+            // Add payment (document ID will be paymentId)
             val paymentRef = db.collection("payment").document(paymentId)
             batch.set(paymentRef, payment)
 
-            // Add payment details
-            paymentDetails.forEach { detail ->
-                val detailId = detail["id"] as String
-                val detailRef = db.collection("paymentdetail").document(detailId)
+            // Add payment details (document IDs will be auto-generated or use counter)
+            paymentDetails.forEachIndexed { index, detail ->
+                val detailId = "${paymentId}_${index + 1}"
+                val detailRef = db.collection("paymentDetails").document(detailId)
                 batch.set(detailRef, detail)
             }
 
@@ -713,7 +710,7 @@ class PaymentViewModel : ViewModel() {
         val timeFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
 
         val startDate = startTime!!.toDate()
-        val endDate = endTime!!.toDate()  // Uses calculated endTime
+        val endDate = endTime!!.toDate()
 
         return if (dateFormat.format(startDate) == dateFormat.format(endDate)) {
             "${dateFormat.format(startDate)} • ${timeFormat.format(startDate)} - ${timeFormat.format(endDate)}"

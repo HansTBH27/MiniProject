@@ -33,7 +33,7 @@ fun ArenaTarumtScreen(navController: NavController, viewModel: FacilityListViewM
 
     val sportFacilities = DashboardItemData(
         title = "Sports Facilities",
-        imageResId = R.drawable.ic_launcher_background,
+        imageResId = R.drawable.fast,
         backgroundColor = Color(0xFF6A5ACD),
         destinationRoute = "arena_tarumt_sport"
     )
@@ -44,7 +44,7 @@ fun ArenaTarumtScreen(navController: NavController, viewModel: FacilityListViewM
                 val encodedName = URLEncoder.encode(facility.name, StandardCharsets.UTF_8.toString())
                 DashboardItemData(
                     title = facility.name,
-                    imageResId = R.drawable.ic_launcher_background,
+                    imageResId = R.drawable.fast,
                     backgroundColor = Color(0xFF6A5ACD),
                     destinationRoute = "facility_detail/$encodedName"
                 )

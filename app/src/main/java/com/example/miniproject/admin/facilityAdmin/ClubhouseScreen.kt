@@ -11,10 +11,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.miniproject.R
@@ -38,7 +36,7 @@ fun ClubhouseScreen(
         val encodedName = URLEncoder.encode(facility.name, StandardCharsets.UTF_8.toString())
         DashboardItemData(
             title = facility.name,
-            imageResId = R.drawable.ic_launcher_background,
+            imageResId = R.drawable.fast,
             backgroundColor = Color(0xFF6A5ACD),
             destinationRoute = "facility_detail/$encodedName"
         )

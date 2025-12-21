@@ -1,6 +1,6 @@
 // BookingSuccessScreen.kt
 
-package com.example.booking
+package com.example.miniproject.payment
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
